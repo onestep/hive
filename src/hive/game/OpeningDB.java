@@ -30,8 +30,8 @@ public class OpeningDB implements Serializable, Constants {
         return db;
     }
 
-    public void write(OutputStream outputStream) throws IOException {
-        ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(outputStream));
+    public void write(OutputStream os) throws IOException {
+        ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(os));
         out.writeObject(this);
         out.flush();
         out.close();
