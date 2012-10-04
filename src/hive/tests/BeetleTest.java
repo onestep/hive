@@ -9,20 +9,20 @@ public class BeetleTest extends HiveTest implements Constants {
 
     @Override
     public void prepareGame(Game game) {
-        putPiece(game, Constants.pieces[0][0], Coords.instance(0, 0));
-        putPiece(game, Constants.pieces[0][3], Coords.instance(-2, -2));
-        putPiece(game, Constants.pieces[0][4], Coords.instance(-1, -3));
+        putPiece(game, Constants.pieces[BLUE][QUEEN], Coords.instance(0, 0));
+        putPiece(game, Constants.pieces[BLUE][ANT], Coords.instance(-2, -2));
+        putPiece(game, Constants.pieces[BLUE][HOPPER], Coords.instance(-1, -3));
 
-        putPiece(game, Constants.pieces[1][0], Coords.instance(-1, -1));
-        putPiece(game, Constants.pieces[1][2], Coords.instance(-1, -3));
+        putPiece(game, Constants.pieces[SILVER][QUEEN], Coords.instance(-1, -1));
+        putPiece(game, Constants.pieces[SILVER][BEETLE], Coords.instance(-1, -3));
 
-        putPiece(game, Constants.pieces[0][2], Coords.instance(-1, -1));
-        putPiece(game, Constants.pieces[0][2], Coords.instance(0, 0));
+        putPiece(game, Constants.pieces[BLUE][BEETLE], Coords.instance(-1, -1));
+        putPiece(game, Constants.pieces[BLUE][BEETLE], Coords.instance(0, 0));
     }
 
     @Override
     public Piece getPiece() {
-        return Constants.pieces[0][2];
+        return Constants.pieces[BLUE][BEETLE];
     }
 
     @Override

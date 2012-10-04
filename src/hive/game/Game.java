@@ -1,20 +1,13 @@
 package hive.game;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public final class Game implements Constants {
 
     public Box box;
     public Table table;
     int[] moves = {0, 0};
-    private int firstPlayer;
     private static final int[] neighbourCountLT = {0, 0, 6, 32, 160, 800, 4000};
-    private Coords[] __coords = new Coords[3];
 
     private HashSet<Coords> freeCoords = new HashSet<Coords>(32);
     private HashSet<Coords> insertCoords = new HashSet<Coords>(32);
@@ -103,7 +96,7 @@ public final class Game implements Constants {
 	return moveSet;
     }
 
-    public Collection getMoves(int paramInt) {
+    public Set<Move> getMoves(int paramInt) {
 	return getMoves(paramInt, null);
     }
 
@@ -173,7 +166,7 @@ public final class Game implements Constants {
     public final synchronized int evaluate(int color) {
 	int i = halfEvaluate(color);
 	int j = halfEvaluate(opponent(color));
-	int k = (i < 4000 ? j < 4000 ? i - j : -4000 : j < 4000 ? 4000 : i - j);
+	int k = (i < WIN ? j < WIN ? i - j : LOSS : j < WIN ? WIN : i - j);
 	return k;
     }
 
@@ -537,15 +530,15 @@ public final class Game implements Constants {
 	return resultSet;
     }
 
-    private void spiderStep(Coords paramCoords, Collection paramCollection, int paramInt1, int paramInt2) {
-	if (paramInt2 == 3)
-	    paramCollection.add(paramCoords);
+    private void spiderStep(Coords paramCoords, Set<Coords> targetCoords, int paramInt1, int step) {
+	if (step == 3)
+	    targetCoords.add(paramCoords);
 	else
 	    for (int i = 0; i < 6; i++)
 		if (i != paramInt1) {
 		    Coords neighbour = paramCoords.getNeighbour(i);
 		    if ((table.countPiecesAt(neighbour) == 0) && isFreedomToMove(paramCoords, neighbour))
-			spiderStep(neighbour, paramCollection, (i + 3) % 6, paramInt2 + 1);
+			spiderStep(neighbour, targetCoords, (i + 3) % 6, step + 1);
 		}
     }
     

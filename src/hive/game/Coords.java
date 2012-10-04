@@ -11,11 +11,11 @@ public final class Coords implements Cloneable, Constants, Comparable, Serializa
     public Coords(int c1, int c2) {
         this.c1 = c1;
         this.c2 = c2;
-        hash = hashCode();
+        hash = hashC1C2(c1, c2);
     }
 
-    public static final synchronized Coords instance(int paramInt1, int paramInt2) {
-        return new Coords(paramInt1, paramInt2);
+    public static final synchronized Coords instance(int c1, int c2) {
+        return new Coords(c1, c2);
     }
 
     public final int getEdge(Coords coords) {
@@ -36,42 +36,41 @@ public final class Coords implements Cloneable, Constants, Comparable, Serializa
 
     public final int distance(Coords coords) {
         if (coords == null)
-            return 1000000000;
+            return INFINITY;
         return abs(c1 - coords.c1 + c2 - coords.c2) >> 1;
     }
 
-    private static final int localToNeighbour(int paramInt1, int paramInt2) {
-        switch (paramInt1) {
+    private static final int localToNeighbour(int c1, int c2) {
+        switch (c1) {
             case 0:
-                if (paramInt2 == 2)
+                if (c2 == 2)
                     return 0;
-                if (paramInt2 == -2)
+                if (c2 == -2)
                     return 3;
                 return -1;
             case 1:
-                if (paramInt2 == 1)
+                if (c2 == 1)
                     return 1;
-                if (paramInt2 == -1)
+                if (c2 == -1)
                     return 2;
                 return -1;
             case -1:
-                if (paramInt2 == -1)
+                if (c2 == -1)
                     return 4;
-                if (paramInt2 == 1)
+                if (c2 == 1)
                     return 5;
                 return -1;
         }
         return -1;
     }
 
-    public static final int compareCoords(Coords coords, Coords coords_9_) {
-        /* TODO: this is dummy, avoid it */
-        throw new RuntimeException("Not implemented");
+    public static final int compareCoords(Coords coords1, Coords coords2) {
+        return coords1.c1 > coords2.c1 ? 1 : coords1.c1 < coords2.c1 ? -1 : coords1.c2 > coords2.c2 ? 1 : coords1.c2 < coords2.c2 ? -1 : 0;
     }
 
     public static final int hashC1C2(int c1, int c2) {
-        /* TODO: this is dummy, aboid it */
-        throw new RuntimeException("Not implemented");
+        int i = c1 + c2 + 22;
+        return i * (i + 1) / 2 + c2 + 22;
     }
 
     @Override
@@ -81,8 +80,7 @@ public final class Coords implements Cloneable, Constants, Comparable, Serializa
 
     @Override
     public final int hashCode() {
-        int i = c1 + c2 + 22;
-        return i * (i + 1) / 2 + c2 + 22;
+        return hash;
     }
 
     @Override
@@ -101,7 +99,6 @@ public final class Coords implements Cloneable, Constants, Comparable, Serializa
 
     @Override
     public int compareTo(Object object) {
-        Coords coords = (Coords) object;
-        return (c1 > coords.c1 ? 1 : c1 < coords.c1 ? -1 : c2 > coords.c2 ? 1 : c2 < coords.c2 ? -1 : 0);
+        return compareCoords(this, (Coords) object);
     }
 }

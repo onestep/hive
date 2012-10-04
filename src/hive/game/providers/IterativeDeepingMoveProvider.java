@@ -1,11 +1,7 @@
 package hive.game.providers;
 
-import hive.game.Game;
-import hive.game.MTD;
-import hive.game.MTD_f;
-import hive.game.Move;
+import hive.game.*;
 import hive.intf.MoveProvider;
-import hive.game.TranspositionTable;
 
 public class IterativeDeepingMoveProvider implements MoveProvider {
 
@@ -37,8 +33,8 @@ public class IterativeDeepingMoveProvider implements MoveProvider {
 
     @Override
     public void _break() {
-        if (this.mtd != null)
-            this.mtd.interrupt();
+        if (mtd != null)
+            mtd.interrupt();
     }
 
     @Override

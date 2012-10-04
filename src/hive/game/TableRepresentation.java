@@ -1,9 +1,9 @@
 package hive.game;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
-public final class TableRepresentation
-        implements Constants, Serializable {
+public final class TableRepresentation implements Constants, Serializable {
 
     private byte[] rep;
     private int hash;
@@ -17,6 +17,12 @@ public final class TableRepresentation
         hash = UniversalHash.hashByteArray(rep, 0);
     }
 
+    TableRepresentation(byte[] rep) {
+        this.rep = new byte[54];
+        System.arraycopy(rep, 0, this.rep, 0, 54);
+        hash = UniversalHash.hashByteArray(this.rep, 0);
+    }
+    
     private TableRepresentation() {
         rep = new byte[54];
     }
@@ -27,17 +33,17 @@ public final class TableRepresentation
         return KEY;
     }
 
-    public static final void countTableRepresentation(Table table, byte[] paramArrayOfByte) {
-        if (paramArrayOfByte.length != 54)
+    public static final void countTableRepresentation(Table table, byte[] rep) {
+        if (rep.length != 54)
             throw new IllegalArgumentException("Bad array length");
         int i = 0;
 
         for (int j = 0; j <= 1; j++)
             for (int k = 0; k < 5; k++)
-                i = getCoords(table, pieces[j][k], paramArrayOfByte, i);
+                i = getCoords(table, pieces[j][k], rep, i);
     }
 
-    private static final int getCoords(Table table, Piece piece, byte[] paramArrayOfByte, int paramInt) {
+    private static final int getCoords(Table table, Piece piece, byte[] rep, int pos) {
         int i = 0;
         for (int j = 0; j < howManyPieces[piece.type]; j++) {
             _coords[j] = table.coordsIndex[piece.color][piece.type][j];
@@ -50,30 +56,19 @@ public final class TableRepresentation
         sortCoords(_coords, 0, howManyPieces[piece.type] - 1);
 
         for (int k = 0; k < howManyPieces[piece.type]; k++) {
-            paramArrayOfByte[(paramInt + k)] = shiftCoord(_coords[k].c1);
-            paramArrayOfByte[(paramInt + k + howManyPieces[piece.type])] = shiftCoord(_coords[k].c2);
+            rep[pos + k] = shiftCoord(_coords[k].c1);
+            rep[pos + k + howManyPieces[piece.type]] = shiftCoord(_coords[k].c2);
         }
 
-        paramArrayOfByte[(paramInt + (howManyPieces[piece.type] << 1))] = (byte) i;
-        return paramInt + (howManyPieces[piece.type] << 1) + 1;
+        rep[pos + (howManyPieces[piece.type] << 1)] = (byte) i;
+        return pos + (howManyPieces[piece.type] << 1) + 1;
     }
 
-    public static boolean equalByteArrays(byte[] array1, byte[] array2) {
-        if ((array1 == null) || (array2 == null))
-            return array1 == array2;
-        if (array1.length != array2.length)
-            return false;
-        for (int i = 0; i < array1.length; i++)
-            if (array1[i] != array2[i])
-                return false;
-        return true;
+    private static byte shiftCoord(int c) {
+        return (byte) (c + 44);
     }
 
-    private static final byte shiftCoord(int paramInt) {
-        return (byte) (paramInt + 44);
-    }
-
-    private static final void sortCoords(Coords[] coordsArray, int a, int b) {
+    private static void sortCoords(Coords[] coordsArray, int a, int b) {
         if (a == b)
             return;
         Coords coords;
@@ -98,27 +93,26 @@ public final class TableRepresentation
         }
     }
 
+    public final TableRepresentation cloneTableRepresentation() {
+        return new TableRepresentation(this.rep);
+    }
+
+    @Override
     public int hashCode() {
         return hash;
     }
 
-    public final TableRepresentation cloneTableRepresentation() {
-        TableRepresentation clone = new TableRepresentation();
-        clone.hash = this.hash;
-        System.arraycopy(rep, 0, clone.rep, 0, rep.length);
-
-        return clone;
-    }
-
+    @Override
     public Object clone() {
         return cloneTableRepresentation();
     }
 
+    @Override
     public boolean equals(Object object) {
         if (object instanceof TableRepresentation) {
             TableRepresentation tableRepresentation = (TableRepresentation) object;
             if (tableRepresentation.hash == hash)
-                return equalByteArrays(rep, tableRepresentation.rep);
+                return Arrays.equals(rep, tableRepresentation.rep);
             return false;
         }
         return false;

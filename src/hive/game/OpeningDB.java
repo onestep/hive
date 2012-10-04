@@ -1,47 +1,58 @@
 package hive.game;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class OpeningDB
-        implements Serializable, Constants {
+public class OpeningDB implements Serializable, Constants {
 
-    private HashMap map;
+    private HashMap<TableRepresentation, HashSet<Move>> map;
 
-    public static OpeningDB read(InputStream paramInputStream)
-            throws IOException, ClassNotFoundException {
-        ObjectInputStream localObjectInputStream = new ObjectInputStream(new BufferedInputStream(paramInputStream));
-        OpeningDB localOpeningDB = (OpeningDB) localObjectInputStream.readObject();
-        return localOpeningDB;
+    public static OpeningDB read(InputStream is) throws IOException {
+        OpeningDB db = new OpeningDB();
+        BufferedReader in = new BufferedReader(new InputStreamReader(is));
+        while (in.ready()) {
+            byte[] rep = new byte[54];
+            for (int i = 0; i < 54; i++)
+                rep[i] = (byte) in.read();
+            byte numMoves = (byte) in.read();
+            HashSet<Move> moves = new HashSet<Move>(numMoves);
+            for (int i = 0; i < numMoves; i++) {
+                /* TODO: read prevCoords and piece color - now null and SILVER */
+                byte type = (byte) in.read();
+                byte c1 = (byte) in.read();
+                byte c2 = (byte) in.read();
+                moves.add(Move.instance(Constants.pieces[SILVER][type], null, Coords.instance(c1, c2)));
+            }
+            db.map.put(new TableRepresentation(rep), moves);
+        }
+        return db;
     }
 
+    public void write(OutputStream outputStream) throws IOException {
+        ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(outputStream));
+        out.writeObject(this);
+        out.flush();
+        out.close();
+    }    
+    
     public OpeningDB() {
-        this.map = new HashMap();
+        map = new HashMap<TableRepresentation, HashSet<Move>>();
     }
 
     public void storeMove(Game game, Move move) {
         int i = 0;
         do {
             i++;
-            TableRepresentation localTableRepresentation = new TableRepresentation(game.table);
-            HashSet localHashSet = (HashSet) this.map.get(localTableRepresentation);
+            TableRepresentation tr = new TableRepresentation(game.table);
+            HashSet<Move> moves = map.get(tr);
 
-            if (localHashSet == null) {
-                localHashSet = new HashSet();
-                this.map.put(localTableRepresentation, localHashSet);
+            if (moves == null) {
+                moves = new HashSet<Move>();
+                map.put(tr, moves);
             }
-            localHashSet.add(move);
+            moves.add(move);
 
             game = rotateGameOnce(game);
             move = rotateMoveOnce(move);
@@ -76,15 +87,8 @@ public class OpeningDB
     }
 
     public Collection retrieveMoves(Game game) {
-        return (Collection) map.get(new TableRepresentation(game.table));
-    }
-
-    public void write(OutputStream paramOutputStream)
-            throws IOException {
-        ObjectOutputStream localObjectOutputStream = new ObjectOutputStream(new BufferedOutputStream(paramOutputStream));
-        localObjectOutputStream.writeObject(this);
-        localObjectOutputStream.flush();
-        localObjectOutputStream.close();
+        System.out.println(map.get(new TableRepresentation(game.table)));
+        return map.get(new TableRepresentation(game.table));
     }
 
     @Override
@@ -92,10 +96,9 @@ public class OpeningDB
         return map.toString();
     }
 
-    public static void main(String[] paramArrayOfString)
-            throws ClassNotFoundException, IOException {
+    public static void main(String[] args) throws ClassNotFoundException, IOException {
         Game game = new Game();
-        Move move = Move.instance(Constants.pieces[0][0], null, Coords.instance(0, 0));
+        Move move = Move.instance(Constants.pieces[BLUE][QUEEN], null, Coords.instance(0, 0));
         OpeningDB openingDB = new OpeningDB();
 
         System.out.println("Original table:");
@@ -106,10 +109,10 @@ public class OpeningDB
 
         System.out.println("DB:");
         System.out.println(openingDB);
-        FileOutputStream localFileOutputStream = new FileOutputStream("opening_db.ser");
-        openingDB.write(localFileOutputStream);
-        FileInputStream localFileInputStream = new FileInputStream("opening_db.ser");
-        openingDB = read(localFileInputStream);
+        FileOutputStream fos = new FileOutputStream("opening_db.ser");
+        openingDB.write(fos);
+        FileInputStream fis = new FileInputStream("opening_db.ser");
+        openingDB = read(fis);
         System.out.println("rereaded DB:");
         System.out.println(openingDB);
 
@@ -118,12 +121,12 @@ public class OpeningDB
         System.out.println(openingDB.retrieveMoves(game));
 
         System.out.println("Testing table representations:");
-        Game localGame2 = new Game();
-        Game localGame3 = new Game();
-        TableRepresentation localTableRepresentation1 = new TableRepresentation(localGame2.table);
-        TableRepresentation localTableRepresentation2 = new TableRepresentation(localGame3.table);
+        Game game1 = new Game();
+        Game game2 = new Game();
+        TableRepresentation tr1 = new TableRepresentation(game1.table);
+        TableRepresentation tr2 = new TableRepresentation(game2.table);
 
-        System.out.println("Hashed OK ??:" + (localTableRepresentation1.hashCode() == localTableRepresentation2.hashCode()));
-        System.out.println("Equal  OK ??:" + localTableRepresentation1.equals(localTableRepresentation2));
+        System.out.println("Hash OK ??:" + (tr1.hashCode() == tr2.hashCode()));
+        System.out.println("Equals OK ??:" + tr1.equals(tr2));
     }
 }

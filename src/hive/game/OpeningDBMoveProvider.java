@@ -1,8 +1,8 @@
 package hive.game;
 
 import hive.intf.MoveProvider;
-import java.util.Collection;
 import java.util.Random;
+import java.util.Set;
 
 public class OpeningDBMoveProvider implements MoveProvider {
 
@@ -19,15 +19,14 @@ public class OpeningDBMoveProvider implements MoveProvider {
     @Override
     public Move findMove(Game game, int color) {
         if (db != null) {
-            Collection localCollection = db.retrieveMoves(game);
-            if (localCollection != null) {
-                Object[] arrayOfObject = localCollection.toArray();
-                if (arrayOfObject.length > 0)
-                    for (int i = random.nextInt(arrayOfObject.length); i < arrayOfObject.length; i++) {
-                        Move localMove = (Move) arrayOfObject[i];
-                        if (localMove.piece.color == color)
-                            return localMove;
-                    }
+            Set<Move> moves = (Set<Move>) db.retrieveMoves(game);
+            if (moves != null && !moves.isEmpty()) {
+                Object[] moveArray = moves.toArray();
+                for (int i = random.nextInt(moveArray.length); i < moveArray.length; i++) {
+                    Move move = (Move) moveArray[i];
+                    if (move.piece.color == color)
+                        return move;
+                }
             }
         }
         return delegate.findMove(game, color);

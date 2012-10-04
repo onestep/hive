@@ -4,35 +4,14 @@ import hive.event.HiveMouseAdapter;
 import hive.event.HiveMouseEvent;
 import hive.event.HiveMouseListener;
 import hive.game.providers.NegaMaxMoveProvider;
-import hive.gui.GameThread;
-import hive.gui.HiveLabel;
-import hive.gui.HivePane;
-import hive.gui.HivePopupMenu;
-import hive.gui.HiveScrollPane;
-import hive.gui.JAnimation;
-import hive.gui.JLabelOut;
+import hive.gui.*;
 import hive.intf.MoveHighlighter;
 import hive.intf.MoveProvider;
 import hive.intf.Thinker;
 import hive.plaf.HiveMetalTheme;
 import hive.plaf.NuHiveMetalTheme;
-import hive.tests.AntTest;
-import hive.tests.BeetleTest;
-import hive.tests.BuggySpiderTest;
-import hive.tests.FreedomToMove1Test;
-import hive.tests.FreedomToMove2Test;
-import hive.tests.HiveTest;
-import hive.tests.HopperTest;
-import hive.tests.OneHiveRuleTest;
-import hive.tests.PlacingTest;
-import hive.tests.QueenBeeTest;
-import hive.tests.SpiderTest;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Image;
-import java.awt.MediaTracker;
+import hive.tests.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -40,18 +19,10 @@ import java.awt.event.WindowEvent;
 import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JWindow;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
+import java.util.HashSet;
+import java.util.Set;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.plaf.metal.MetalLookAndFeel;
@@ -95,6 +66,7 @@ public class MainApplet extends JFrame
 
     public MainApplet() {
         addWindowListener(new WindowAdapter() {
+
             @Override
             public void windowClosing(WindowEvent event) {
                 System.exit(0);
@@ -116,13 +88,14 @@ public class MainApplet extends JFrame
         else
             try {
                 SwingUtilities.invokeAndWait(new Runnable() {
+
                     @Override
                     public void run() {
                         newGame();
                     }
                 });
-            } catch (Exception localException) {
-                localException.printStackTrace();
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
 
         System.out.println("Ready");
@@ -133,9 +106,9 @@ public class MainApplet extends JFrame
         playerColor = 0;
         getMoveState = new GetMoveState();
 
-        GameProcess localGameProcess = new GameProcess(game, getMoveState, new OpeningDBMoveProvider(db, new NegaMaxMoveProvider(game, this)), playerColor, out, this, newLook);
+        GameProcess gameProcess = new GameProcess(game, getMoveState, new OpeningDBMoveProvider(db, new NegaMaxMoveProvider(game, this)), playerColor, out, this, newLook);
 
-        gameThread = new GameThread(localGameProcess);
+        gameThread = new GameThread(gameProcess);
         resetHivePanes();
         calibratePanes();
 
@@ -156,6 +129,7 @@ public class MainApplet extends JFrame
     public void start() {
         if (ok)
             SwingUtilities.invokeLater(new Runnable() {
+
                 @Override
                 public void run() {
                     MainApplet.this.calibratePanes();
@@ -165,7 +139,7 @@ public class MainApplet extends JFrame
 
     private void initCommon() {
         String str = getParameter("new_look");
-        if ((str != null) && (str.equals("true"))) {
+        if ((str != null) && str.equals("true")) {
             newLook = true;
             pieceImagePrefix = "nu";
             stackIndicatorColor = Color.orange;
@@ -262,6 +236,7 @@ public class MainApplet extends JFrame
         if (moveTests) {
             JButton button = new JButton("Next Test");
             button.addActionListener(new ActionListener() {
+
                 @Override
                 public synchronized void actionPerformed(ActionEvent event) {
                     MainApplet.this.nextTest();
@@ -271,6 +246,7 @@ public class MainApplet extends JFrame
         } else {
             JButton button = new JButton("New Game");
             button.addActionListener(new ActionListener() {
+
                 @Override
                 public synchronized void actionPerformed(ActionEvent event) {
                     cleanUpGame();
@@ -282,6 +258,7 @@ public class MainApplet extends JFrame
 
         JButton centerButton = new JButton("Center");
         centerButton.addActionListener(new ActionListener() {
+
             @Override
             public synchronized void actionPerformed(ActionEvent event) {
                 tableScroll.initHiveScrollPane();
@@ -294,6 +271,7 @@ public class MainApplet extends JFrame
 
         JButton aboutButton = new JButton("About...");
         aboutButton.addActionListener(new ActionListener() {
+
             @Override
             public synchronized void actionPerformed(ActionEvent event) {
                 aboutWindow.setLocationRelativeTo(tableScroll);
@@ -314,6 +292,7 @@ public class MainApplet extends JFrame
 
         JButton closeButton = new JButton("Close");
         closeButton.addActionListener(new ActionListener() {
+
             @Override
             public synchronized void actionPerformed(ActionEvent paramAnonymousActionEvent) {
                 aboutWindow.setVisible(false);
@@ -399,12 +378,12 @@ public class MainApplet extends JFrame
     }
 
     private void readOpeningDB() {
-        String str = "opening_db.ser";
+        String str = "opening_db.bin";
         try {
-            FileInputStream localFileInputStream = new FileInputStream(str);
-            db = OpeningDB.read(localFileInputStream);
-        } catch (Exception localException) {
-            localException.printStackTrace();
+            FileInputStream fis = new FileInputStream(str);
+            db = OpeningDB.read(fis);
+        } catch (Exception ex) {
+            ex.printStackTrace();
             db = null;
             System.out.println("Error loading openings:" + str);
         }
@@ -421,9 +400,9 @@ public class MainApplet extends JFrame
         MetalLookAndFeel.setCurrentTheme(new HiveMetalTheme());
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-        } catch (Exception localException) {
+        } catch (Exception ex) {
             out.println("Failed loading L&F");
-            localException.printStackTrace();
+            ex.printStackTrace();
         }
     }
 
@@ -446,12 +425,16 @@ public class MainApplet extends JFrame
         tableScroll.initHiveScrollPane();
     }
 
+    @Override
     public void highlightBefore(Move paramMove) {
     }
 
+    @Override
     public void highlightAfter(final Move move) {
         try {
             SwingUtilities.invokeAndWait(new Runnable() {
+
+                @Override
                 public void run() {
                     tablePane.clearHighlights();
                     boxPane[0].clearHighlights();
@@ -483,10 +466,13 @@ public class MainApplet extends JFrame
         }
     }
 
+    @Override
     public void highlightTurn(int i) {
         final int c = i;
 
         SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
             public void run() {
                 if (c > -1) {
                     borders[c].setBorder(fatBorder);
@@ -505,6 +491,7 @@ public class MainApplet extends JFrame
     public void highlightWin(int i) {
         final Coords winCoords = game.table.firstCoordsForPiece(Constants.pieces[i > 0 ? 0 : 1][0]);
         SwingUtilities.invokeLater(new Runnable() {
+
             @Override
             public void run() {
                 for (int j = 0; j < 6; j++) {
@@ -518,6 +505,7 @@ public class MainApplet extends JFrame
     @Override
     public void repaintGame() {
         SwingUtilities.invokeLater(new Runnable() {
+
             @Override
             public void run() {
                 MainApplet.this.synchronizeUI();
@@ -609,12 +597,9 @@ public class MainApplet extends JFrame
         }
     }
 
-    void highlightSet(Collection paramCollection) {
-        Iterator localIterator = paramCollection.iterator();
-        while (localIterator.hasNext()) {
-            Coords localCoords = (Coords) localIterator.next();
-            tablePane.setHighlight(localCoords.c1, localCoords.c2, normalHighlightColor, 3.0F, true);
-        }
+    void highlightSet(HashSet<Coords> set) {
+        for (Coords coords : set)
+            tablePane.setHighlight(coords.c1, coords.c2, normalHighlightColor, 3.0F, true);
     }
 
     private void synchronizeUI() {
@@ -642,11 +627,11 @@ public class MainApplet extends JFrame
 
         paramHiveTest.prepareGame(game);
 
-        Collection localCollection = paramHiveTest.getTestCoords(game);
+        HashSet<Coords> set = paramHiveTest.getTestCoords(game);
 
         synchronizeUI();
 
-        highlightSet(localCollection);
+        highlightSet(set);
 
         Coords localCoords = paramHiveTest.getCoords();
         if (localCoords != null)
@@ -729,18 +714,17 @@ public class MainApplet extends JFrame
 
         @Override
         public void hiveMouseClicked(HiveMouseEvent paramHiveMouseEvent) {
-            Coords localCoords = Coords.instance(paramHiveMouseEvent.getP(), paramHiveMouseEvent.getQ());
-            Piece localPiece1 = game.table.getPieceAt(localCoords);
-            if ((localPiece1 != null)
-                    && (localPiece1.type == 2)) {
-                Image[] arrayOfImage = new Image[game.table.countPiecesAt(localCoords)];
+            Coords coords = Coords.instance(paramHiveMouseEvent.getP(), paramHiveMouseEvent.getQ());
+            Piece piece = game.table.getPieceAt(coords);
+            if ((piece != null) && (piece.type == BEETLE)) {
+                Image[] images = new Image[game.table.countPiecesAt(coords)];
 
-                for (int i = 0; i < arrayOfImage.length; i++) {
-                    Piece localPiece2 = game.table.getPieceAt(localCoords, i);
-                    arrayOfImage[i] = ((Image) scaledImages.get(new Integer(MainApplet.imageID[localPiece2.color][localPiece2.type])));
+                for (int i = 0; i < images.length; i++) {
+                    Piece stackedPiece = game.table.getPieceAt(coords, i);
+                    images[i] = scaledImages.get(new Integer(MainApplet.imageID[stackedPiece.color][stackedPiece.type]));
                 }
                 if (paramHiveMouseEvent.originalEvent.isControlDown())
-                    popup.show(tablePane, paramHiveMouseEvent.originalEvent.getX(), paramHiveMouseEvent.originalEvent.getY(), arrayOfImage);
+                    popup.show(tablePane, paramHiveMouseEvent.originalEvent.getX(), paramHiveMouseEvent.originalEvent.getY(), images);
             }
         }
 
@@ -758,29 +742,27 @@ public class MainApplet extends JFrame
         private int color;
         private Piece piece;
         private Move move;
-        private Object semaphore = new Object();
+        private final Object semaphore = new Object();
         private HiveMouseListener beginMove = new BeginMove();
         private HiveMouseListener endMove = new EndMove();
-        private Collection availableMoves;
+        private Set<Move> availableMoves;
 
         GetMoveState() {
         }
 
-        public Move findMove(Game paramGame, int paramInt) {
-            Move move;
+        @Override
+        public Move findMove(Game game, int color) {
             synchronized (semaphore) {
-                g = paramGame;
-                color = paramInt;
-                availableMoves = paramGame.getMoves(paramInt);
+                g = game;
+                this.color = color;
+                availableMoves = game.getMoves(color);
 
-                if (MainApplet.this.game.mustInsertQueen(paramInt)) {
+                if (game.mustInsertQueen(color)) {
                     out.println("You must insert Queen bee.");
-                    this.piece = Constants.queens[paramInt];
+                    piece = Constants.queens[color];
                     prevCoords = null;
-                    Piece piece = this.piece;
-
-                    boxPane[paramInt].setHighlight(0, coordC2FromPieceType(piece), Color.blue, 3.0F, true);
-                    highlightSet(paramGame.getTargetCoords(piece, null));
+                    boxPane[color].setHighlight(0, coordC2FromPieceType(piece), Color.blue, 3.0F, true);
+                    highlightSet(game.getTargetCoords(piece, null));
 
                     curListener = endMove;
                 } else
@@ -791,13 +773,13 @@ public class MainApplet extends JFrame
                 boxPane[1].addHiveMouseListener(curListener);
                 try {
                     semaphore.wait();
-                } catch (InterruptedException localInterruptedException) {
+                } catch (InterruptedException ex) {
                 }
-                move = this.move;
+                return this.move;
             }
-            return move;
         }
 
+        @Override
         public void cleanUp() {
             tablePane.removeHiveMouseListener(curListener);
             boxPane[0].removeHiveMouseListener(curListener);
@@ -811,10 +793,12 @@ public class MainApplet extends JFrame
             curListener = null;
         }
 
+        @Override
         public String getName() {
             return "User";
         }
 
+        @Override
         public void _break() {
             synchronized (semaphore) {
                 move = null;
@@ -824,8 +808,9 @@ public class MainApplet extends JFrame
 
         class EndMove extends HiveMouseAdapter {
 
+            @Override
             public void hiveMousePressed(HiveMouseEvent event) {
-                if ((event.originalEvent.isControlDown()) || (event.originalEvent.isShiftDown()) || (event.originalEvent.isAltDown()))
+                if (event.originalEvent.isControlDown() || event.originalEvent.isShiftDown() || event.originalEvent.isAltDown())
                     return;
                 synchronized (semaphore) {
                     boolean bool = false;
@@ -857,14 +842,13 @@ public class MainApplet extends JFrame
         class BeginMove extends HiveMouseAdapter {
 
             @Override
-            public void hiveMousePressed(HiveMouseEvent paramHiveMouseEvent) {
-                if ((paramHiveMouseEvent.originalEvent.isControlDown()) || (paramHiveMouseEvent.originalEvent.isShiftDown()) || (paramHiveMouseEvent.originalEvent.isAltDown()))
+            public void hiveMousePressed(HiveMouseEvent event) {
+                if (event.originalEvent.isControlDown() || event.originalEvent.isShiftDown() || event.originalEvent.isAltDown())
                     return;
                 synchronized (semaphore) {
-                    Piece localPiece;
-                    if (paramHiveMouseEvent.sender == tablePane) {
-                        Coords localCoords = Coords.instance(paramHiveMouseEvent.getP(), paramHiveMouseEvent.getQ());
-                        localPiece = g.table.getPieceAt(localCoords);
+                    if (event.sender == tablePane) {
+                        Coords localCoords = Coords.instance(event.getP(), event.getQ());
+                        Piece localPiece = g.table.getPieceAt(localCoords);
                         if (localPiece == null)
                             return;
                         if (localPiece.color != color)
@@ -877,10 +861,10 @@ public class MainApplet extends JFrame
                         piece = localPiece;
                         prevCoords = localCoords;
 
-                        highlightSet(g.getTargetCoords(localPiece, localCoords));
+                        highlightSet(g.getTargetCoords(piece, localCoords));
                         tablePane.setHighlight(localCoords.c1, localCoords.c2, Color.blue, 3.0F, true);
-                    } else if (paramHiveMouseEvent.sender == boxPane[color]) {
-                        int i = pieceTypeFromCoordC2(paramHiveMouseEvent.getQ());
+                    } else if (event.sender == boxPane[color]) {
+                        int i = pieceTypeFromCoordC2(event.getQ());
                         if (i < 0)
                             return;
                         if (game.box.howMany(color, i) <= 0)
@@ -890,12 +874,11 @@ public class MainApplet extends JFrame
                         boxPane[0].clearHighlights();
                         boxPane[1].clearHighlights();
 
-                        localPiece = Constants.pieces[color][i];
-                        piece = localPiece;
+                        piece = Constants.pieces[color][i];
                         prevCoords = null;
 
-                        boxPane[color].setHighlight(paramHiveMouseEvent.getP(), paramHiveMouseEvent.getQ(), Color.blue, 3.0F, true);
-                        highlightSet(g.getTargetCoords(localPiece, null));
+                        boxPane[color].setHighlight(event.getP(), event.getQ(), Color.blue, 3.0F, true);
+                        highlightSet(g.getTargetCoords(piece, null));
                     } else {
                         out.println("It's not your box");
                         return;

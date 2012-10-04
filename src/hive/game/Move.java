@@ -16,7 +16,7 @@ public final class Move implements Constants, Cloneable, Serializable {
         this.piece = piece;
         this.prevCoords = prevCoords;
         this.newCoords = newCoords;
-        this.hash = (piece.hashCode() << 24 + (prevCoords != null ? prevCoords.hashCode() << 16 : 0) + newCoords.hashCode());
+        hash = (piece.hashCode() << 24 + (prevCoords != null ? prevCoords.hashCode() << 16 : 0) + newCoords.hashCode());
     }
 
     public static final synchronized Move instance(Piece piece, Coords prevCoords, Coords newCoords) {
@@ -27,8 +27,7 @@ public final class Move implements Constants, Cloneable, Serializable {
         return prevCoords == null;
     }
 
-    private void writeObject(ObjectOutputStream out)
-            throws IOException {
+    private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
         out.writeInt(piece.color);
         out.writeInt(piece.type);
@@ -50,7 +49,7 @@ public final class Move implements Constants, Cloneable, Serializable {
     public boolean equals(Object object) {
         if (object instanceof Move) {
             Move move = (Move) object;
-            return (piece == move.piece) && (prevCoords != null ? prevCoords.equals(move.prevCoords) : move.prevCoords == null) && (newCoords.equals(move.newCoords));
+            return (piece == move.piece) && (prevCoords != null ? prevCoords.equals(move.prevCoords) : move.prevCoords == null) && newCoords.equals(move.newCoords);
         }
         return false;
     }
@@ -62,6 +61,6 @@ public final class Move implements Constants, Cloneable, Serializable {
 
     @Override
     public String toString() {
-        return "MOVE " + (piece != null ? piece.toString() : "null") + " FROM " + (prevCoords != null ? prevCoords.toString() : "null") + " TO " + newCoords.toString();
+        return "MOVE " + piece.toString() + (prevCoords != null ? " FROM " + prevCoords.toString() : "") + " TO " + newCoords.toString();
     }
 }

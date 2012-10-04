@@ -4,14 +4,14 @@ import hive.game.Coords;
 import hive.game.Game;
 import hive.game.Move;
 import hive.game.Piece;
-import java.util.Collection;
+import java.util.HashSet;
 
 public abstract class HiveTest {
 
-    public abstract void prepareGame(Game paramGame);
+    public abstract void prepareGame(Game game);
 
-    public Collection getTestCoords(Game paramGame) {
-        return paramGame.getTargetCoords(getPiece(), getCoords());
+    public HashSet<Coords> getTestCoords(Game game) {
+        return game.getTargetCoords(getPiece(), getCoords());
     }
 
     public abstract Piece getPiece();
@@ -20,8 +20,8 @@ public abstract class HiveTest {
 
     public abstract String getName();
 
-    protected void putPiece(Game paramGame, Piece paramPiece, Coords paramCoords) {
-        Move localMove = Move.instance(paramPiece, null, paramCoords);
-        paramGame.doMove(localMove);
+    protected void putPiece(Game game, Piece piece, Coords coords) {
+        Move move = Move.instance(piece, null, coords);
+        game.doMove(move);
     }
 }

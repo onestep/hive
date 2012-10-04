@@ -9,7 +9,7 @@ public class FreedomToMove2Test extends FreedomToMove1Test implements Constants 
     @Override
     public void prepareGame(Game game) {
         super.prepareGame(game);
-        putPiece(game, Constants.pieces[1][3], Coords.instance(-1, -1));
+        putPiece(game, Constants.pieces[SILVER][ANT], Coords.instance(-1, -1));
     }
 
     @Override

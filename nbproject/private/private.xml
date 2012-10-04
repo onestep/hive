@@ -1,35 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/1"/>
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/1">
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/OpeningDB.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/OpeningDBBuilder.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/OpeningDBMoveProvider.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/Piece.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/TableRepresentation.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/Table.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/TranspositionTable.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/TranspositionEntry.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/MainApplet.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/Move.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/Game.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/GameProcess.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/Coords.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/Constants.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/MTD.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/MTD_f.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/gui/HiveContainer.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/providers/NegaMaxAB.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/providers/InteractiveNegaMaxAB.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/Box.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/game/SimpleMoveComparator.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/tests/AntTest.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/tests/BuggySpiderTest.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/tests/FreedomToMove2Test.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/tests/HopperTest.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/tests/OneHiveRuleTest.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/tests/PlacingTest.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/tests/QueenBeeTest.java</file>
-        <file>file:/home/onestep/NetBeansProjects/hive_css/src/hive/tests/SpiderTest.java</file>
+        <file>file:/home/onestep/NetBeansProjects/hive/src/hive/event/HiveMouseEvent.java</file>
+        <file>file:/home/onestep/NetBeansProjects/hive/src/hive/tests/AntTest.java</file>
+        <file>file:/home/onestep/NetBeansProjects/hive/src/hive/util/DBConverter.java</file>
+        <file>file:/home/onestep/NetBeansProjects/hive/src/hive/game/OpeningDB.java</file>
+        <file>file:/home/onestep/NetBeansProjects/hive/src/hive/game/TableRepresentation.java</file>
+        <file>file:/home/onestep/NetBeansProjects/hive/src/hive/game/MTD.java</file>
+        <file>file:/home/onestep/NetBeansProjects/hive/src/hive/game/TranspositionEntry.java</file>
     </open-files>
 </project-private>

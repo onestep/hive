@@ -110,14 +110,14 @@ public abstract class MTD implements Constants {
             Move localMove = (Move) localIterator.next();
             this.g.doMove(localMove);
 
-            TableRepresentation localTableRepresentation = TableRepresentation.getKey(this.g.table);
-            TranspositionEntry localTranspositionEntry = this.tTable.retrieve(localTableRepresentation);
-            if (localTranspositionEntry != null) {
-                int i = localTranspositionEntry.getLowerBound(paramInt3, paramInt2 - 1);
+            TableRepresentation tr = TableRepresentation.getKey(this.g.table);
+            TranspositionEntry entry = this.tTable.retrieve(tr);
+            if (entry != null) {
+                int i = entry.getLowerBound(paramInt3, paramInt2 - 1);
                 if (i > paramInt1) {
                     this.ETCResult = i;
                     localObject = localMove;
-                    localTranspositionEntry.cutoff = true;
+                    entry.cutoff = true;
                 }
             }
 
@@ -128,19 +128,19 @@ public abstract class MTD implements Constants {
         return null;
     }
 
-    private final int mtTopMost(int paramInt1, int paramInt2, int paramInt3) {
+    private final int mtTopMost(int paramInt1, int paramInt2, int color) {
         this.total += 1;
 
-        TableRepresentation localTableRepresentation = TableRepresentation.getKey(this.g.table);
+        TableRepresentation tr = TableRepresentation.getKey(this.g.table);
         this.foundMove = null;
-        TranspositionEntry localTranspositionEntry = this.tTable.retrieve(localTableRepresentation);
+        TranspositionEntry entry = this.tTable.retrieve(tr);
         Move localMove1 = null;
 
-        if (localTranspositionEntry != null) {
-            int i = localTranspositionEntry.getLowerBound(paramInt3, paramInt2);
-            int j = localTranspositionEntry.getUpperBound(paramInt3, paramInt2);
+        if (entry != null) {
+            int i = entry.getLowerBound(color, paramInt2);
+            int j = entry.getUpperBound(color, paramInt2);
 
-            this.foundMove = localTranspositionEntry.getMove(paramInt3);
+            this.foundMove = entry.getMove(color);
 
             if (this.foundMove != null)
                 if (i < j) {
@@ -148,13 +148,13 @@ public abstract class MTD implements Constants {
                         this.cutOffs += 1;
                         this.tTUsed += 1;
 
-                        localTranspositionEntry.cutoff = true;
+                        entry.cutoff = true;
                         return i;
                     }
                     if (j < paramInt1) {
                         this.tTUsed += 1;
 
-                        localTranspositionEntry.cutoff = false;
+                        entry.cutoff = false;
                         return j;
                     }
                 } else if (i == j) {
@@ -164,51 +164,51 @@ public abstract class MTD implements Constants {
                     return i;
                 }
 
-            localMove1 = localTranspositionEntry.getMove(paramInt3);
+            localMove1 = entry.getMove(color);
         }
 
         Move localObject = null;
         int m = -1000000000;
         int n = 0;
 
-        if (localTranspositionEntry == null)
-            localTranspositionEntry = new TranspositionEntry(localTableRepresentation.cloneTableRepresentation(), this.g.table.size());
+        if (entry == null)
+            entry = new TranspositionEntry(tr.cloneTableRepresentation(), this.g.table.size());
 
         if (paramInt2 == 0)
-            m = this.g.evaluate(paramInt3);
-        else if ((this.g.isWin(0)) || (this.g.isWin(1))) {
+            m = this.g.evaluate(color);
+        else if (this.g.isWin(0) || this.g.isWin(1)) {
             n = 1;
-            m = this.g.evaluate(paramInt3);
+            m = this.g.evaluate(color);
         } else {
-            Collection localCollection;
-            if (localTranspositionEntry.moves[paramInt3] == null) {
-                localCollection = this.g.getMoves(paramInt3, this.simpleComparator);
-                localTranspositionEntry.moves[paramInt3] = localCollection;
+            Collection moves;
+            if (entry.moves[color] == null) {
+                moves = this.g.getMoves(color, this.simpleComparator);
+                entry.moves[color] = moves;
             } else
-                localCollection = localTranspositionEntry.moves[paramInt3];
+                moves = entry.moves[color];
             Move localMove2;
             if ((paramInt2 > 1)
-                    && ((localMove2 = ETC(paramInt1, localCollection, paramInt2, paramInt3)) != null)) {
+                    && ((localMove2 = ETC(paramInt1, moves, paramInt2, color)) != null)) {
                 this.ETCCutoffs += 1;
                 this.foundMove = localMove2;
                 return this.ETCResult;
             }
 
-            Iterator localIterator = localCollection.iterator();
+            Iterator it = moves.iterator();
 
             if (localMove1 != null)
                 localMove2 = localMove1;
-            else if (localIterator.hasNext())
-                localMove2 = (Move) localIterator.next();
+            else if (it.hasNext())
+                localMove2 = (Move) it.next();
             else
-                return -mt(-paramInt1, paramInt2 - 1, paramInt3 == 0 ? 1 : 0);
+                return -mt(-paramInt1, paramInt2 - 1, color == 0 ? 1 : 0);
 
             localObject = localMove2;
 
             while ((localMove2 != null) && (m < paramInt1) && (!this.interrupted)) {
-                if ((m == -1000000000) || (isUseful(localMove2, 0))) {
+                if ((m == -INFINITY) || isUseful(localMove2, 0)) {
                     this.g.doMove(localMove2);
-                    int k = -mt(-paramInt1, paramInt2 - 1, paramInt3 == 0 ? 1 : 0);
+                    int k = -mt(-paramInt1, paramInt2 - 1, color == 0 ? 1 : 0);
                     this.g.unDoMove(localMove2);
 
                     if (k > m) {
@@ -217,10 +217,10 @@ public abstract class MTD implements Constants {
                     }
                 }
 
-                localMove2 = localIterator.hasNext() ? (Move) localIterator.next() : null;
+                localMove2 = it.hasNext() ? (Move) it.next() : null;
                 if ((localMove2 != null)
                         && (localMove2.equals(localMove1)))
-                    localMove2 = localIterator.hasNext() ? (Move) localIterator.next() : null;
+                    localMove2 = it.hasNext() ? (Move) it.next() : null;
 
             }
 
@@ -229,32 +229,32 @@ public abstract class MTD implements Constants {
 
             this.foundMove = localObject;
 
-            if (this.foundMove == localTranspositionEntry.getMove(paramInt3))
+            if (this.foundMove == entry.getMove(color))
                 this.tTOrderingWorks += 1;
 
         }
 
         if (n != 0) {
-            localTranspositionEntry.setUpperBound(paramInt3, 1000000000, m);
-            localTranspositionEntry.setLowerBound(paramInt3, 1000000000, m);
-            localTranspositionEntry.cutoff = (m >= paramInt1);
+            entry.setUpperBound(color, 1000000000, m);
+            entry.setLowerBound(color, 1000000000, m);
+            entry.cutoff = (m >= paramInt1);
         } else if (paramInt2 == 0) {
-            localTranspositionEntry.setUpperBound(paramInt3, 0, m);
-            localTranspositionEntry.setLowerBound(paramInt3, 0, m);
+            entry.setUpperBound(color, 0, m);
+            entry.setLowerBound(color, 0, m);
         } else {
-            localTranspositionEntry.setMove(paramInt3, localObject);
+            entry.setMove(color, localObject);
             if (m < paramInt1) {
-                localTranspositionEntry.setUpperBound(paramInt3, paramInt2, m);
-                localTranspositionEntry.cutoff = false;
+                entry.setUpperBound(color, paramInt2, m);
+                entry.cutoff = false;
             } else {
-                localTranspositionEntry.setLowerBound(paramInt3, paramInt2, m);
-                localTranspositionEntry.cutoff = true;
+                entry.setLowerBound(color, paramInt2, m);
+                entry.cutoff = true;
 
                 this.cutOffs += 1;
             }
         }
 
-        this.tTable.store(localTranspositionEntry);
+        this.tTable.store(entry);
 
         return m;
     }
@@ -262,26 +262,26 @@ public abstract class MTD implements Constants {
     private final int mt(int paramInt1, int paramInt2, int paramInt3) {
         this.total += 1;
 
-        TableRepresentation localTableRepresentation = TableRepresentation.getKey(this.g.table);
-        TranspositionEntry localTranspositionEntry = this.tTable.retrieve(localTableRepresentation);
+        TableRepresentation tr = TableRepresentation.getKey(this.g.table);
+        TranspositionEntry entry = this.tTable.retrieve(tr);
         Move localMove1 = null;
 
-        if (localTranspositionEntry != null) {
-            int i = localTranspositionEntry.getLowerBound(paramInt3, paramInt2);
-            int j = localTranspositionEntry.getUpperBound(paramInt3, paramInt2);
+        if (entry != null) {
+            int i = entry.getLowerBound(paramInt3, paramInt2);
+            int j = entry.getUpperBound(paramInt3, paramInt2);
 
             if (i < j) {
                 if (i > paramInt1) {
                     this.cutOffs += 1;
                     this.tTUsed += 1;
 
-                    localTranspositionEntry.cutoff = true;
+                    entry.cutoff = true;
                     return i;
                 }
                 if (j < paramInt1) {
                     this.tTUsed += 1;
 
-                    localTranspositionEntry.cutoff = false;
+                    entry.cutoff = false;
                     return j;
                 }
             } else if (i == j) {
@@ -291,15 +291,15 @@ public abstract class MTD implements Constants {
                 return i;
             }
 
-            localMove1 = localTranspositionEntry.getMove(paramInt3);
+            localMove1 = entry.getMove(paramInt3);
         }
 
         Move localObject = null;
         int m = -1000000000;
         int n = 0;
 
-        if (localTranspositionEntry == null)
-            localTranspositionEntry = new TranspositionEntry(localTableRepresentation.cloneTableRepresentation(), this.g.table.size());
+        if (entry == null)
+            entry = new TranspositionEntry(tr.cloneTableRepresentation(), this.g.table.size());
 
         if (paramInt2 == 0)
             m = this.g.evaluate(paramInt3);
@@ -308,11 +308,11 @@ public abstract class MTD implements Constants {
             m = this.g.evaluate(paramInt3);
         } else {
             Collection localCollection;
-            if (localTranspositionEntry.moves[paramInt3] == null) {
+            if (entry.moves[paramInt3] == null) {
                 localCollection = this.g.getMoves(paramInt3, this.simpleComparator);
-                localTranspositionEntry.moves[paramInt3] = localCollection;
+                entry.moves[paramInt3] = localCollection;
             } else
-                localCollection = localTranspositionEntry.moves[paramInt3];
+                localCollection = entry.moves[paramInt3];
             Move localMove2;
             if ((paramInt2 > 1)
                     && ((localMove2 = ETC(paramInt1, localCollection, paramInt2, paramInt3)) != null)) {
@@ -355,32 +355,32 @@ public abstract class MTD implements Constants {
             if (this.interrupted)
                 return 0;
 
-            if (localObject == localTranspositionEntry.getMove(paramInt3))
+            if (localObject == entry.getMove(paramInt3))
                 this.tTOrderingWorks += 1;
 
         }
 
         if (n != 0) {
-            localTranspositionEntry.setUpperBound(paramInt3, 1000000000, m);
-            localTranspositionEntry.setLowerBound(paramInt3, 1000000000, m);
-            localTranspositionEntry.cutoff = (m >= paramInt1);
+            entry.setUpperBound(paramInt3, 1000000000, m);
+            entry.setLowerBound(paramInt3, 1000000000, m);
+            entry.cutoff = (m >= paramInt1);
         } else if (paramInt2 == 0) {
-            localTranspositionEntry.setUpperBound(paramInt3, 0, m);
-            localTranspositionEntry.setLowerBound(paramInt3, 0, m);
+            entry.setUpperBound(paramInt3, 0, m);
+            entry.setLowerBound(paramInt3, 0, m);
         } else {
-            localTranspositionEntry.setMove(paramInt3, localObject);
+            entry.setMove(paramInt3, localObject);
             if (m < paramInt1) {
-                localTranspositionEntry.setUpperBound(paramInt3, paramInt2, m);
-                localTranspositionEntry.cutoff = false;
+                entry.setUpperBound(paramInt3, paramInt2, m);
+                entry.cutoff = false;
             } else {
-                localTranspositionEntry.setLowerBound(paramInt3, paramInt2, m);
-                localTranspositionEntry.cutoff = true;
+                entry.setLowerBound(paramInt3, paramInt2, m);
+                entry.cutoff = true;
 
                 this.cutOffs += 1;
             }
         }
 
-        this.tTable.store(localTranspositionEntry);
+        this.tTable.store(entry);
 
         return m;
     }

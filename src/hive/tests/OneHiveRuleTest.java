@@ -5,16 +5,15 @@ import hive.game.Coords;
 import hive.game.Game;
 import hive.game.Piece;
 
-public class OneHiveRuleTest extends HiveTest
-        implements Constants {
+public class OneHiveRuleTest extends HiveTest implements Constants {
 
     @Override
     public void prepareGame(Game game) {
-        putPiece(game, Constants.pieces[0][2], Coords.instance(0, 0));
-        putPiece(game, Constants.pieces[1][3], Coords.instance(1, -1));
-        putPiece(game, Constants.pieces[0][3], Coords.instance(-1, 1));
-        putPiece(game, Constants.pieces[0][0], Coords.instance(-2, 2));
-        putPiece(game, Constants.pieces[1][3], Coords.instance(-2, 0));
+        putPiece(game, Constants.pieces[BLUE][BEETLE], Coords.instance(0, 0));
+        putPiece(game, Constants.pieces[SILVER][ANT], Coords.instance(1, -1));
+        putPiece(game, Constants.pieces[BLUE][ANT], Coords.instance(-1, 1));
+        putPiece(game, Constants.pieces[BLUE][QUEEN], Coords.instance(-2, 2));
+        putPiece(game, Constants.pieces[SILVER][ANT], Coords.instance(-2, 0));
     }
 
     @Override
@@ -24,7 +23,7 @@ public class OneHiveRuleTest extends HiveTest
 
     @Override
     public Piece getPiece() {
-        return Constants.pieces[0][3];
+        return Constants.pieces[BLUE][ANT];
     }
 
     @Override

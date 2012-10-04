@@ -4,32 +4,28 @@ import hive.gui.HiveContainer;
 import hive.gui.HivePoint;
 import java.awt.event.MouseEvent;
 
-public class HiveMouseEvent
-{
-  private int p;
-  private int q;
-  public MouseEvent originalEvent;
-  public HiveContainer sender;
+public class HiveMouseEvent {
 
-  public HiveMouseEvent(int paramInt1, int paramInt2, MouseEvent paramMouseEvent)
-  {
-    this.p = paramInt1;
-    this.q = paramInt2;
-    this.originalEvent = paramMouseEvent;
-  }
+    private int p;
+    private int q;
+    public MouseEvent originalEvent;
+    public HiveContainer sender;
 
-  public int getP()
-  {
-    return this.p;
-  }
+    public HiveMouseEvent(int p, int q, MouseEvent event) {
+        this.p = p;
+        this.q = q;
+        originalEvent = event;
+    }
 
-  public int getQ()
-  {
-    return this.q;
-  }
+    public int getP() {
+        return p;
+    }
 
-  public HivePoint getHivePoint()
-  {
-    return new HivePoint(this.p, this.q);
-  }
+    public int getQ() {
+        return q;
+    }
+
+    public HivePoint getHivePoint() {
+        return new HivePoint(p, q);
+    }
 }
