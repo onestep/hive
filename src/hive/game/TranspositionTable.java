@@ -1,7 +1,6 @@
 package hive.game;
 
-public class TranspositionTable
-        implements Constants {
+public class TranspositionTable implements Constants {
 
     private TranspositionEntry[] table;
     public final int size;
@@ -9,41 +8,32 @@ public class TranspositionTable
     public int collisions = 0;
 
     public int getCount() {
-        return this.count;
+        return count;
     }
 
     public TranspositionTable() {
-        int i = 0;
-
-        int j = 262144;
+        int i;
+        int tableSize = 262144;
         do {
             try {
-                table = new TranspositionEntry[j];
+                table = new TranspositionEntry[tableSize];
                 i = 1;
-            } catch (OutOfMemoryError localOutOfMemoryError) {
+            } catch (OutOfMemoryError err) {
                 System.gc();
                 i = 0;
-                j >>= 1;
+                tableSize >>= 1;
             }
         } while (i == 0);
-        size = j;
+        size = tableSize;
     }
 
-    private int getHashIndex(TranspositionEntry paramTranspositionEntry) {
-        return paramTranspositionEntry.tableRepresentation.hashCode() & size - 1;
+    private int getHashIndex(TableRepresentation tr) {
+        return tr.hashCode() & size - 1;
     }
 
-    private int getHashIndex(TableRepresentation paramTableRepresentation) {
-        return paramTableRepresentation.hashCode() & size - 1;
-    }
-
-    private int getHashIndex(int paramInt) {
-        return paramInt & size - 1;
-    }
-
-    public synchronized TranspositionEntry retrieve(TableRepresentation rep) {
-        TranspositionEntry entry = this.table[getHashIndex(rep)];
-        if ((entry != null) && entry.tableRepresentation.equals(rep))
+    public synchronized TranspositionEntry retrieve(TableRepresentation tr) {
+        TranspositionEntry entry = this.table[getHashIndex(tr)];
+        if ((entry != null) && entry.tableRepresentation.equals(tr))
             return entry;
         return null;
     }
@@ -51,7 +41,7 @@ public class TranspositionTable
     public synchronized void store(TranspositionEntry entry) {
         int i = getHashIndex(entry.tableRepresentation);
         if (table[i] != null) {
-            TranspositionEntry tableEntry = this.table[i];
+            TranspositionEntry tableEntry = table[i];
             if (entry == tableEntry)
                 return;
             collisions += 1;
@@ -62,10 +52,6 @@ public class TranspositionTable
             table[i] = entry;
             count += 1;
         }
-    }
-
-    private static int abs(int i) {
-        return i > 0 ? i : -i;
     }
 
     @Override

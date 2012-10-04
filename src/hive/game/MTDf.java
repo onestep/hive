@@ -1,12 +1,12 @@
 package hive.game;
 
-public class MTD_f extends MTD {
+public class MTDf extends MTD {
 
-    public MTD_f(Game game, TranspositionTable t) {
-        super(game, t);
+    public MTDf(Game game, TranspositionTable table) {
+        super(game, table);
     }
 
-    public MTD_f(Game game) {
+    public MTDf(Game game) {
         super(game);
     }
 

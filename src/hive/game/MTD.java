@@ -6,152 +6,154 @@ import java.util.Iterator;
 public abstract class MTD implements Constants {
 
     protected TranspositionTable tTable;
-    Game g;
+    Game game;
     public Move foundMove = null;
-    public int foundMinMaxValue = 0;
-    public int forColor = -1;
+
+    protected int foundMinMaxValue = 0;
+    protected int forColor = -1;
+
+    private boolean interrupted;
+
     private int tTUsed;
     private int cutOffs;
     private int ETCCutoffs;
     private int total;
     private int tTOrderingWorks;
-    private boolean interrupted;
     private int searchDepth;
     private int driverPasses;
     private int ETCResult;
-    private SimpleMoveComparator simpleComparator;
+    
+    private SimpleMoveComparator comparator;
 
-    public MTD(Game paramGame, TranspositionTable paramTranspositionTable) {
-        this.tTable = paramTranspositionTable;
-        this.g = paramGame;
+    public MTD(Game game, TranspositionTable table) {
+        this.tTable = table;
+        this.game = game;
 
-        this.simpleComparator = new SimpleMoveComparator(paramGame);
+        comparator = new SimpleMoveComparator(game);
     }
 
-    public MTD(Game paramGame) {
-        this(paramGame, new TranspositionTable());
+    public MTD(Game game) {
+        this(game, new TranspositionTable());
     }
 
-    protected abstract int first(int paramInt);
+    protected abstract int first(int color);
 
     protected abstract int next(int L, int H, int g);
 
     public void interrupt() {
-        this.interrupted = true;
+        interrupted = true;
     }
 
     public boolean isInterrupted() {
-        return this.interrupted;
+        return interrupted;
     }
 
-    public final synchronized void search(int paramInt1, int paramInt2) {
-        int k = 1000000001;
-        int m = -1000000001;
-        int i;
-        int j = i = first(paramInt1);
+    public final synchronized void search(int color, int depth) {
+        int H = INFINITY + 1;
+        int L = -(INFINITY + 1);
+        int g;
+        int G = g = first(color);
 
-        Move localMove = this.foundMove;
-        this.interrupted = false;
+        Move localMove = foundMove;
+        interrupted = false;
 
-        this.searchDepth = paramInt2;
+        searchDepth = depth;
 
-        this.driverPasses = 0;
+        driverPasses = 0;
 
         System.out.println("********* MTD Routine***************");
+        System.out.println("Depth=" + depth);
 
-        System.out.println("Depth=" + paramInt2);
-
-        this.tTUsed = (this.cutOffs = this.ETCCutoffs = this.total = 0);
-        this.tTOrderingWorks = 0;
+        tTOrderingWorks = tTUsed = cutOffs = ETCCutoffs = total = 0;
         do {
-            i = mtTopMost(j - 1, paramInt2, paramInt1);
+            g = mtTopMost(G - 1, depth, color);
 
-            if (i < j)
-                k = i;
+            if (g < G)
+                H = g;
             else
-                m = i;
+                L = g;
 
-            this.driverPasses += 1;
+            driverPasses += 1;
 
-            j = next(m, k, i);
-        } while ((k > m) && (!this.interrupted));
+            G = next(L, H, g);
+        } while ((H > L) && (!this.interrupted));
 
-        System.out.println("driver passes " + this.driverPasses);
+        System.out.println("driver passes " + driverPasses);
 
-        if (this.interrupted)
+        if (interrupted)
             System.out.println("INTERRUPTED");
 
-        System.out.println("TT-size " + this.tTable.getCount());
-        System.out.println("TT-collisions " + this.tTable.collisions);
-        System.out.println("Total nodes searched :" + this.total);
-        System.out.println("Transpositions :" + this.tTUsed);
-        System.out.println("Cutoffs( both normal and transposed) :" + this.cutOffs);
-        System.out.println("Enchanced Transposition cutoffs :" + this.ETCCutoffs);
-        System.out.println("Transopistion Orderings proper:" + this.tTOrderingWorks);
-        System.out.println("Found value:" + i);
+        System.out.println("TT-size " + tTable.getCount());
+        System.out.println("TT-collisions " + tTable.collisions);
+        System.out.println("Total nodes searched :" + total);
+        System.out.println("Transpositions :" + tTUsed);
+        System.out.println("Cutoffs (both normal and transposed) :" + cutOffs);
+        System.out.println("Enhanced Transposition cutoffs :" + ETCCutoffs);
+        System.out.println("Transposition Orderings proper:" + tTOrderingWorks);
+        System.out.println("Found value:" + g);
         System.out.println("************************************");
 
-        if (!this.interrupted) {
-            this.foundMinMaxValue = i;
-            this.forColor = paramInt1;
+        if (!interrupted) {
+            foundMinMaxValue = g;
+            forColor = color;
         } else
-            this.foundMove = localMove;
+            foundMove = localMove;
     }
 
     private final boolean isUseful(Move paramMove, int paramInt) {
         return true;
     }
 
-    private final Move ETC(int paramInt1, Collection paramCollection, int paramInt2, int paramInt3) {
-        Move localObject = null;
+    private Move ETC(int bound, Collection moves, int depth, int color) {
+        Move ETCMove = null;
 
-        Iterator localIterator = paramCollection.iterator();
-        while ((localIterator.hasNext()) && (!this.interrupted)) {
-            Move localMove = (Move) localIterator.next();
-            this.g.doMove(localMove);
+        Iterator it = moves.iterator();
+        while (it.hasNext() && (!this.interrupted)) {
+            Move move = (Move) it.next();
+            game.doMove(move);
 
-            TableRepresentation tr = TableRepresentation.getKey(this.g.table);
-            TranspositionEntry entry = this.tTable.retrieve(tr);
+            TableRepresentation tr = TableRepresentation.getKey(game.table);
+            TranspositionEntry entry = tTable.retrieve(tr);
             if (entry != null) {
-                int i = entry.getLowerBound(paramInt3, paramInt2 - 1);
-                if (i > paramInt1) {
-                    this.ETCResult = i;
-                    localObject = localMove;
+                int lowerBound = entry.getLowerBound(color, depth - 1);
+                if (lowerBound > bound) {
+                    ETCResult = lowerBound;
+                    ETCMove = move;
                     entry.cutoff = true;
                 }
             }
 
-            this.g.unDoMove(localMove);
-            if (localObject != null)
-                return localObject;
+            game.unDoMove(move);
+            if (ETCMove != null)
+                return ETCMove;
         }
         return null;
     }
 
-    private final int mtTopMost(int paramInt1, int paramInt2, int color) {
-        this.total += 1;
+    private int mtTopMost(int bound, int depth, int color) {
+        total += 1;
 
-        TableRepresentation tr = TableRepresentation.getKey(this.g.table);
-        this.foundMove = null;
-        TranspositionEntry entry = this.tTable.retrieve(tr);
-        Move localMove1 = null;
+        TableRepresentation tr = TableRepresentation.getKey(game.table);
+        foundMove = null;
+        TranspositionEntry entry = tTable.retrieve(tr);
+        Move entryMove = null;
 
         if (entry != null) {
-            int i = entry.getLowerBound(color, paramInt2);
-            int j = entry.getUpperBound(color, paramInt2);
+            int i = entry.getLowerBound(color, depth);
+            int j = entry.getUpperBound(color, depth);
 
-            this.foundMove = entry.getMove(color);
+            foundMove = entry.getMove(color);
 
             if (this.foundMove != null)
                 if (i < j) {
-                    if (i > paramInt1) {
+                    if (i > bound) {
                         this.cutOffs += 1;
                         this.tTUsed += 1;
 
                         entry.cutoff = true;
                         return i;
                     }
-                    if (j < paramInt1) {
+                    if (j < bound) {
                         this.tTUsed += 1;
 
                         entry.cutoff = false;
@@ -164,179 +166,177 @@ public abstract class MTD implements Constants {
                     return i;
                 }
 
-            localMove1 = entry.getMove(color);
+            entryMove = entry.getMove(color);
         }
 
         Move localObject = null;
-        int m = -1000000000;
+        int m = -INFINITY;
         int n = 0;
 
         if (entry == null)
-            entry = new TranspositionEntry(tr.cloneTableRepresentation(), this.g.table.size());
+            entry = new TranspositionEntry(tr.cloneTableRepresentation(), game.table.size());
 
-        if (paramInt2 == 0)
-            m = this.g.evaluate(color);
-        else if (this.g.isWin(0) || this.g.isWin(1)) {
+        if (depth == 0)
+            m = game.evaluate(color);
+        else if (game.isWin(BLUE) || game.isWin(SILVER)) {
             n = 1;
-            m = this.g.evaluate(color);
+            m = game.evaluate(color);
         } else {
             Collection moves;
             if (entry.moves[color] == null) {
-                moves = this.g.getMoves(color, this.simpleComparator);
+                moves = game.getMoves(color, comparator);
                 entry.moves[color] = moves;
             } else
                 moves = entry.moves[color];
-            Move localMove2;
-            if ((paramInt2 > 1)
-                    && ((localMove2 = ETC(paramInt1, moves, paramInt2, color)) != null)) {
-                this.ETCCutoffs += 1;
-                this.foundMove = localMove2;
-                return this.ETCResult;
+            Move ETCMove;
+            if ((depth > 1) && ((ETCMove = ETC(bound, moves, depth, color)) != null)) {
+                ETCCutoffs += 1;
+                foundMove = ETCMove;
+                return ETCResult;
             }
 
             Iterator it = moves.iterator();
 
-            if (localMove1 != null)
-                localMove2 = localMove1;
+            if (entryMove != null)
+                ETCMove = entryMove;
             else if (it.hasNext())
-                localMove2 = (Move) it.next();
+                ETCMove = (Move) it.next();
             else
-                return -mt(-paramInt1, paramInt2 - 1, color == 0 ? 1 : 0);
+                return -mt(-bound, depth - 1, Game.opponent(color));
 
-            localObject = localMove2;
+            localObject = ETCMove;
 
-            while ((localMove2 != null) && (m < paramInt1) && (!this.interrupted)) {
-                if ((m == -INFINITY) || isUseful(localMove2, 0)) {
-                    this.g.doMove(localMove2);
-                    int k = -mt(-paramInt1, paramInt2 - 1, color == 0 ? 1 : 0);
-                    this.g.unDoMove(localMove2);
+            while ((ETCMove != null) && (m < bound) && (!this.interrupted)) {
+                if ((m == -INFINITY) || isUseful(ETCMove, 0)) {
+                    game.doMove(ETCMove);
+                    int k = -mt(-bound, depth - 1, color == 0 ? 1 : 0);
+                    game.unDoMove(ETCMove);
 
                     if (k > m) {
                         m = k;
-                        localObject = localMove2;
+                        localObject = ETCMove;
                     }
                 }
 
-                localMove2 = it.hasNext() ? (Move) it.next() : null;
-                if ((localMove2 != null)
-                        && (localMove2.equals(localMove1)))
-                    localMove2 = it.hasNext() ? (Move) it.next() : null;
+                ETCMove = it.hasNext() ? (Move) it.next() : null;
+                if ((ETCMove != null)
+                        && (ETCMove.equals(entryMove)))
+                    ETCMove = it.hasNext() ? (Move) it.next() : null;
 
             }
 
             if (this.interrupted)
                 return 0;
 
-            this.foundMove = localObject;
+            foundMove = localObject;
 
-            if (this.foundMove == entry.getMove(color))
-                this.tTOrderingWorks += 1;
+            if (foundMove == entry.getMove(color))
+                tTOrderingWorks += 1;
 
         }
 
         if (n != 0) {
-            entry.setUpperBound(color, 1000000000, m);
-            entry.setLowerBound(color, 1000000000, m);
-            entry.cutoff = (m >= paramInt1);
-        } else if (paramInt2 == 0) {
+            entry.setUpperBound(color, INFINITY, m);
+            entry.setLowerBound(color, INFINITY, m);
+            entry.cutoff = (m >= bound);
+        } else if (depth == 0) {
             entry.setUpperBound(color, 0, m);
             entry.setLowerBound(color, 0, m);
         } else {
             entry.setMove(color, localObject);
-            if (m < paramInt1) {
-                entry.setUpperBound(color, paramInt2, m);
+            if (m < bound) {
+                entry.setUpperBound(color, depth, m);
                 entry.cutoff = false;
             } else {
-                entry.setLowerBound(color, paramInt2, m);
+                entry.setLowerBound(color, depth, m);
                 entry.cutoff = true;
 
-                this.cutOffs += 1;
+                cutOffs += 1;
             }
         }
 
-        this.tTable.store(entry);
+        tTable.store(entry);
 
         return m;
     }
 
-    private final int mt(int paramInt1, int paramInt2, int paramInt3) {
-        this.total += 1;
+    private int mt(int bound, int depth, int color) {
+        total += 1;
 
-        TableRepresentation tr = TableRepresentation.getKey(this.g.table);
-        TranspositionEntry entry = this.tTable.retrieve(tr);
-        Move localMove1 = null;
+        TableRepresentation tr = TableRepresentation.getKey(game.table);
+        TranspositionEntry entry = tTable.retrieve(tr);
+        Move entryMove = null;
 
         if (entry != null) {
-            int i = entry.getLowerBound(paramInt3, paramInt2);
-            int j = entry.getUpperBound(paramInt3, paramInt2);
+            int lowerBound = entry.getLowerBound(color, depth);
+            int upperBound = entry.getUpperBound(color, depth);
 
-            if (i < j) {
-                if (i > paramInt1) {
-                    this.cutOffs += 1;
-                    this.tTUsed += 1;
+            if (lowerBound < upperBound) {
+                if (lowerBound > bound) {
+                    cutOffs += 1;
+                    tTUsed += 1;
 
                     entry.cutoff = true;
-                    return i;
+                    return lowerBound;
                 }
-                if (j < paramInt1) {
-                    this.tTUsed += 1;
+                if (upperBound < bound) {
+                    tTUsed += 1;
 
                     entry.cutoff = false;
-                    return j;
+                    return upperBound;
                 }
-            } else if (i == j) {
-                this.cutOffs += 1;
-                this.tTUsed += 1;
+            } else if (lowerBound == upperBound) {
+                cutOffs += 1;
+                tTUsed += 1;
 
-                return i;
+                return lowerBound;
             }
 
-            localMove1 = entry.getMove(paramInt3);
+            entryMove = entry.getMove(color);
         }
 
         Move localObject = null;
-        int m = -1000000000;
+        int m = -INFINITY;
         int n = 0;
 
         if (entry == null)
-            entry = new TranspositionEntry(tr.cloneTableRepresentation(), this.g.table.size());
+            entry = new TranspositionEntry(tr.cloneTableRepresentation(), game.table.size());
 
-        if (paramInt2 == 0)
-            m = this.g.evaluate(paramInt3);
-        else if ((this.g.isWin(0)) || (this.g.isWin(1))) {
+        if (depth == 0)
+            m = game.evaluate(color);
+        else if (game.isWin(BLUE) || game.isWin(SILVER)) {
             n = 1;
-            m = this.g.evaluate(paramInt3);
+            m = game.evaluate(color);
         } else {
-            Collection localCollection;
-            if (entry.moves[paramInt3] == null) {
-                localCollection = this.g.getMoves(paramInt3, this.simpleComparator);
-                entry.moves[paramInt3] = localCollection;
+            Collection moves;
+            if (entry.moves[color] == null) {
+                moves = game.getMoves(color, comparator);
+                entry.moves[color] = moves;
             } else
-                localCollection = entry.moves[paramInt3];
-            Move localMove2;
-            if ((paramInt2 > 1)
-                    && ((localMove2 = ETC(paramInt1, localCollection, paramInt2, paramInt3)) != null)) {
-                this.ETCCutoffs += 1;
-                return this.ETCResult;
+                moves = entry.moves[color];
+            if ((depth > 1) && (ETC(bound, moves, depth, color) != null)) {
+                ETCCutoffs += 1;
+                return ETCResult;
             }
 
-            Iterator localIterator = localCollection.iterator();
+            Iterator it = moves.iterator();
 
-            if (localMove1 != null)
-                localMove2 = localMove1;
-            else if (localIterator.hasNext())
-                localMove2 = (Move) localIterator.next();
+            Move localMove2;
+            if (entryMove != null)
+                localMove2 = entryMove;
+            else if (it.hasNext())
+                localMove2 = (Move) it.next();
             else
-                return -mt(-paramInt1, paramInt2, paramInt3 == 0 ? 1 : 0);
+                return -mt(-bound, depth, Game.opponent(color));
 
             localObject = localMove2;
 
-            while ((localMove2 != null) && (m < paramInt1) && (!this.interrupted)) {
+            while ((localMove2 != null) && (m < bound) && (!this.interrupted)) {
                 if ((m == -1000000000) || (isUseful(localMove2, 0))) {
-                    this.g.doMove(localMove2);
-                    int k = -mt(-paramInt1, paramInt2 - 1, paramInt3 == 0 ? 1 : 0);
+                    this.game.doMove(localMove2);
+                    int k = -mt(-bound, depth - 1, color == 0 ? 1 : 0);
 
-                    this.g.unDoMove(localMove2);
+                    this.game.unDoMove(localMove2);
 
                     if (k > m) {
                         m = k;
@@ -345,42 +345,41 @@ public abstract class MTD implements Constants {
 
                 }
 
-                localMove2 = localIterator.hasNext() ? (Move) localIterator.next() : null;
+                localMove2 = it.hasNext() ? (Move) it.next() : null;
                 if ((localMove2 != null)
-                        && (localMove2.equals(localMove1)))
-                    localMove2 = localIterator.hasNext() ? (Move) localIterator.next() : null;
+                        && (localMove2.equals(entryMove)))
+                    localMove2 = it.hasNext() ? (Move) it.next() : null;
 
             }
 
-            if (this.interrupted)
+            if (interrupted)
                 return 0;
 
-            if (localObject == entry.getMove(paramInt3))
-                this.tTOrderingWorks += 1;
-
+            if (localObject == entry.getMove(color))
+                tTOrderingWorks += 1;
         }
 
         if (n != 0) {
-            entry.setUpperBound(paramInt3, 1000000000, m);
-            entry.setLowerBound(paramInt3, 1000000000, m);
-            entry.cutoff = (m >= paramInt1);
-        } else if (paramInt2 == 0) {
-            entry.setUpperBound(paramInt3, 0, m);
-            entry.setLowerBound(paramInt3, 0, m);
+            entry.setUpperBound(color, INFINITY, m);
+            entry.setLowerBound(color, INFINITY, m);
+            entry.cutoff = (m >= bound);
+        } else if (depth == 0) {
+            entry.setUpperBound(color, 0, m);
+            entry.setLowerBound(color, 0, m);
         } else {
-            entry.setMove(paramInt3, localObject);
-            if (m < paramInt1) {
-                entry.setUpperBound(paramInt3, paramInt2, m);
+            entry.setMove(color, localObject);
+            if (m < bound) {
+                entry.setUpperBound(color, depth, m);
                 entry.cutoff = false;
             } else {
-                entry.setLowerBound(paramInt3, paramInt2, m);
+                entry.setLowerBound(color, depth, m);
                 entry.cutoff = true;
 
-                this.cutOffs += 1;
+                cutOffs += 1;
             }
         }
 
-        this.tTable.store(entry);
+        tTable.store(entry);
 
         return m;
     }

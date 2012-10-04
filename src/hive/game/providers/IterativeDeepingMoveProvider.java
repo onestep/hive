@@ -18,7 +18,7 @@ public class IterativeDeepingMoveProvider implements MoveProvider {
     public Move findMove(Game game, int color) {
         if (this.game != game) {
             this.game = game;
-            mtd = new MTD_f(game, t);
+            mtd = new MTDf(game, t);
             id = new IterativeDeeper(mtd);
         }
 

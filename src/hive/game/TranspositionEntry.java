@@ -2,69 +2,67 @@ package hive.game;
 
 import java.util.Collection;
 
-public final class TranspositionEntry
-        implements Constants {
+public final class TranspositionEntry implements Constants {
 
     public final TableRepresentation tableRepresentation;
-    private static final int forColor = 0;
     private int lowerbound;
     private int higherbound;
-    private int l_depth = -1000000000;
-    private int h_depth = -1000000000;
+    private int l_depth = -INFINITY;
+    private int h_depth = -INFINITY;
     public final int numOfPieces;
     public Move[] proposedMove = {null, null};
     public Collection[] moves = {null, null};
     public boolean cutoff;
 
     public int depth() {
-        return this.l_depth + this.h_depth + 1 >> 1;
+        return l_depth + h_depth + 1 >> 1;
     }
 
-    TranspositionEntry(TableRepresentation paramTableRepresentation, int paramInt) {
-        this.numOfPieces = paramInt;
-        this.tableRepresentation = paramTableRepresentation;
-        this.cutoff = false;
-        this.lowerbound = -INFINITY;
-        this.higherbound = INFINITY;
+    TranspositionEntry(TableRepresentation tableRepresentation, int numOfPieces) {
+        this.numOfPieces = numOfPieces;
+        this.tableRepresentation = tableRepresentation;
+        cutoff = false;
+        lowerbound = -INFINITY;
+        higherbound = INFINITY;
     }
 
-    public final int getLowerBound(int color, int paramInt2) {
-        return paramInt2 <= this.h_depth ? -this.higherbound : color == 0 ? -INFINITY : paramInt2 <= this.l_depth ? this.lowerbound : -1000000000;
+    public final int getLowerBound(int color, int depth) {
+        return depth <= h_depth ? -higherbound : color == 0 ? -INFINITY : depth <= l_depth ? lowerbound : -INFINITY;
     }
 
-    public final int getUpperBound(int color, int paramInt2) {
-        return paramInt2 <= this.l_depth ? -this.lowerbound : color == 0 ? INFINITY : paramInt2 <= this.h_depth ? this.higherbound : 1000000000;
+    public final int getUpperBound(int color, int depth) {
+        return depth <= l_depth ? -lowerbound : color == 0 ? INFINITY : depth <= h_depth ? higherbound : INFINITY;
     }
 
-    public final void setLowerBound(int paramInt1, int paramInt2, int paramInt3) {
-        if (paramInt1 == 0) {
-            if (paramInt2 >= this.l_depth) {
-                this.lowerbound = paramInt3;
-                this.l_depth = paramInt2;
+    public final void setLowerBound(int color, int depth, int bound) {
+        if (color == 0) {
+            if (depth >= l_depth) {
+                lowerbound = bound;
+                l_depth = depth;
             }
-        } else if (paramInt2 >= this.h_depth) {
-            this.higherbound = (-paramInt3);
-            this.h_depth = paramInt2;
+        } else if (depth >= h_depth) {
+            higherbound = -bound;
+            h_depth = depth;
         }
     }
 
-    public final void setUpperBound(int paramInt1, int paramInt2, int paramInt3) {
-        if (paramInt1 != 0) {
-            if (paramInt2 >= this.l_depth) {
-                this.lowerbound = (-paramInt3);
-                this.l_depth = paramInt2;
+    public final void setUpperBound(int color, int depth, int bound) {
+        if (color != 0) {
+            if (depth >= l_depth) {
+                lowerbound = -bound;
+                l_depth = depth;
             }
-        } else if (paramInt2 >= this.h_depth) {
-            this.higherbound = paramInt3;
-            this.h_depth = paramInt2;
+        } else if (depth >= h_depth) {
+            higherbound = bound;
+            h_depth = depth;
         }
     }
 
-    public final Move getMove(int paramInt) {
-        return this.proposedMove[paramInt];
+    public final Move getMove(int color) {
+        return proposedMove[color];
     }
 
-    public final void setMove(int paramInt, Move paramMove) {
-        this.proposedMove[paramInt] = paramMove;
+    public final void setMove(int color, Move move) {
+        proposedMove[color] = move;
     }
 }
