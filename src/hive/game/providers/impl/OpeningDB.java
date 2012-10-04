@@ -5,7 +5,6 @@ import hive.game.Coords;
 import hive.game.Game;
 import hive.game.Move;
 import hive.game.Piece;
-import hive.game.TableRepresentation;
 import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;

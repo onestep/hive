@@ -1,5 +1,10 @@
-package hive.game;
+package hive.game.providers.impl;
 
+import hive.game.Constants;
+import hive.game.Coords;
+import hive.game.Piece;
+import hive.game.Table;
+import hive.game.UniversalHash;
 import java.util.Arrays;
 
 public final class TableRepresentation implements Constants {

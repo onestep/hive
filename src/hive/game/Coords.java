@@ -14,7 +14,7 @@ public final class Coords implements Cloneable, Constants, Comparable, Serializa
         hash = hashC1C2(c1, c2);
     }
 
-    public static final synchronized Coords instance(int c1, int c2) {
+    public static synchronized Coords instance(int c1, int c2) {
         return new Coords(c1, c2);
     }
 
@@ -40,7 +40,7 @@ public final class Coords implements Cloneable, Constants, Comparable, Serializa
         return abs(c1 - coords.c1 + c2 - coords.c2) >> 1;
     }
 
-    private static final int localToNeighbour(int c1, int c2) {
+    private static int localToNeighbour(int c1, int c2) {
         switch (c1) {
             case 0:
                 if (c2 == 2)
@@ -64,11 +64,11 @@ public final class Coords implements Cloneable, Constants, Comparable, Serializa
         return -1;
     }
 
-    public static final int compareCoords(Coords coords1, Coords coords2) {
+    public static int compareCoords(Coords coords1, Coords coords2) {
         return coords1.c1 > coords2.c1 ? 1 : coords1.c1 < coords2.c1 ? -1 : coords1.c2 > coords2.c2 ? 1 : coords1.c2 < coords2.c2 ? -1 : 0;
     }
 
-    public static final int hashC1C2(int c1, int c2) {
+    public static int hashC1C2(int c1, int c2) {
         int i = c1 + c2 + 22;
         return i * (i + 1) / 2 + c2 + 22;
     }

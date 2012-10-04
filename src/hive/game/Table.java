@@ -15,24 +15,21 @@ public final class Table implements Constants {
     private boolean canIterate2;
     private static final Placement DEFAULT_EMPTY_PLACEMENT = new Placement(null);
     private Map<Coords, Placement> map;
-    Coords[][][] coordsIndex;
+    public Coords[][][] coordsIndex;
 
     public Table() {
-        modCount = 0;
-
-        _size = 0;
-
         canIterate = false;
-
         canIterate2 = false;
+        _size = 0;
+        map = new TreeMap<Coords, Placement>();
+        modCount = 0;
 
         coordsIndex = new Coords[2][][];
         coordsIndex[0] = new Coords[5][];
         coordsIndex[1] = new Coords[5][];
-        for (int j = 0; j < 2; j++)
-            for (int k = 0; k < 5; k++)
-                coordsIndex[j][k] = new Coords[Constants.howManyPieces[k]];
-        map = new TreeMap<Coords, Placement>();
+        for (int color = 0; color < 2; color++)
+            for (int type = 0; type < 5; type++)
+                coordsIndex[color][type] = new Coords[Constants.howManyPieces[type]];
     }
 
     public void reset() {
@@ -41,12 +38,13 @@ public final class Table implements Constants {
         _size = 0;
         map.clear();
         modCount += 1;
-        coordsIndex = new Coords[2][][];
+
+	coordsIndex = new Coords[2][][];
         coordsIndex[0] = new Coords[5][];
         coordsIndex[1] = new Coords[5][];
-        for (int j = 0; j < 2; j++)
-            for (int k = 0; k < 5; k++)
-                this.coordsIndex[j][k] = new Coords[Constants.howManyPieces[k]];
+        for (int color = 0; color < 2; color++)
+            for (int type = 0; type < 5; type++)
+                coordsIndex[color][type] = new Coords[Constants.howManyPieces[type]];
     }
 
     public final Piece getPieceAt(Coords paramCoords, int paramInt) {
@@ -152,15 +150,14 @@ public final class Table implements Constants {
         return placement != null ? placement : DEFAULT_EMPTY_PLACEMENT;
     }
 
+    @Override
     public String toString() {
-        Iterator localIterator = this.map.keySet().iterator();
         String str = "";
-        while (localIterator.hasNext()) {
-            Coords localCoords = (Coords) localIterator.next();
-            Placement localPlacement = (Placement) this.map.get(localCoords);
+        for (Coords coords : this.map.keySet()) {
+            Placement localPlacement = (Placement) this.map.get(coords);
             int j = localPlacement.count();
             if (j > 0) {
-                str = str + "on " + localCoords + "(";
+                str = str + "on " + coords + "(";
                 for (int k = j - 1; k >= 0; k--) {
                     str = str + localPlacement.getPiece(k);
                     if (k > 0)
@@ -184,25 +181,25 @@ public final class Table implements Constants {
         }
 
         public final boolean isEmpty() {
-            return this.piece == null;
+            return piece == null;
         }
 
         public final int count() {
-            return this.howManyUnder + (this.piece != null ? 1 : 0);
+            return howManyUnder + (piece != null ? 1 : 0);
         }
 
         public final Piece remove() {
             Piece localPiece = this.piece;
-            this.piece = (this.howManyUnder > 0 ? this.piecesUnder[(--this.howManyUnder)] : null);
+            this.piece = (howManyUnder > 0 ? piecesUnder[(--howManyUnder)] : null);
             return localPiece;
         }
 
-        public final Piece getPiece(int paramInt) {
-            if (paramInt == 0)
-                return this.piece;
-            int i = this.howManyUnder - paramInt;
+        public final Piece getPiece(int z) {
+            if (z == 0)
+                return piece;
+            int i = howManyUnder - z;
             if (i >= 0)
-                return this.piecesUnder[i];
+                return piecesUnder[i];
             return null;
         }
 

@@ -1,7 +1,6 @@
 package hive.game.providers.impl;
 
 import hive.game.Constants;
-import hive.game.TableRepresentation;
 
 public class TranspositionTable implements Constants {
 
