@@ -1,4 +1,4 @@
-package hive.game.providers;
+package hive.game.providers.impl;
 
 import hive.game.*;
 import hive.intf.Thinker;
@@ -11,7 +11,7 @@ public class NegaMaxAB implements Constants {
     private static final int MAX_DEPTH = 4;
     private Move foundMove;
     private Game game;
-    private Comparator comparator;
+    private Comparator<Move> comparator;
     private boolean interrupted;
     private Thinker thinker;
 
@@ -100,26 +100,26 @@ public class NegaMaxAB implements Constants {
 	return i;
     }
 
-    private int negaMaxAB(int paramInt1, int paramInt2, int paramInt3, int paramInt4, boolean paramBoolean) {
-	if ((paramInt2 == 4) || game.isWin(paramInt1) || game.isWin(Game.opponent(paramInt1)))
-	    return game.evaluate(paramInt1);
-	int i = -1000000000;
+    private int negaMaxAB(int color, int depth, int a, int b, boolean paramBoolean) {
+	if ((depth == MAX_DEPTH) || game.isWin(BLUE) || game.isWin(SILVER))
+	    return game.evaluate(color);
+	int i = -INFINITY;
 	int j = i;
 
-	Collection localCollection = game.getMoves(paramInt1, this.comparator);
+	Collection moves = game.getMoves(color, this.comparator);
 
-	if (localCollection.isEmpty())
-	    return -negaMaxAB(Game.opponent(paramInt1), paramInt2 + 1, -paramInt4, -paramInt3, false);
-	Iterator localIterator = localCollection.iterator();
+	if (moves.isEmpty())
+	    return -negaMaxAB(Game.opponent(color), depth + 1, -b, -a, false);
+	Iterator it = moves.iterator();
 
-	while (localIterator.hasNext() && (!interrupted) && (i < paramInt4)) {
-	    Move localMove = (Move) localIterator.next();
-	    if (i > paramInt3)
-		paramInt3 = i;
-	    if ((check(localMove, paramInt2, paramBoolean)) || (i == -1000000000)) {
-		game.doMove(localMove);
-		j = -negaMaxAB(Game.opponent(paramInt1), paramInt2 + 1, -paramInt4, -paramInt3, true);
-		game.unDoMove(localMove);
+	while (it.hasNext() && (!interrupted) && (i < b)) {
+	    Move move = (Move) it.next();
+	    if (i > a)
+		a = i;
+	    if (check(move, depth, paramBoolean) || (i == -INFINITY)) {
+		game.doMove(move);
+		j = -negaMaxAB(Game.opponent(color), depth + 1, -b, -a, true);
+		game.unDoMove(move);
 	    }
 	    if (j > i)
 		i = j;

@@ -42,19 +42,19 @@ public final class Game implements Constants {
 	this.freeReady = (this.busyReady = this.insertReady = this.notAllowedReady = false);
     }
 
-    public synchronized Set<Move> getMoves(int color, Comparator comparator) {
+    public synchronized Set<Move> getMoves(int color, Comparator<Move> comparator) {
 	Set<Move> moveSet;
 	if (comparator != null)
-	    moveSet = new TreeSet(comparator);
+	    moveSet = new TreeSet<Move>(comparator);
 	else
-	    moveSet = new HashSet(64);
+	    moveSet = new HashSet<Move>(64);
 
 	getBusyCoords();
 	getFreeCoords();
 
 	if (canMove(color))
 	    for (Coords busyCoord : busyCoords) {
-		Piece piece = this.table.getPieceAt(busyCoord);
+		Piece piece = table.getPieceAt(busyCoord);
 
 		if (piece.color == color) {
 		    HashSet<Coords> targetCoords = null;
@@ -100,32 +100,32 @@ public final class Game implements Constants {
 	return getMoves(paramInt, null);
     }
 
-    public HashSet<Coords> getTargetCoords(Piece paramPiece, Coords paramCoords) {
+    public HashSet<Coords> getTargetCoords(Piece paramPiece, Coords prevCoords) {
 	getBusyCoords();
 	getFreeCoords();
 
-	if (paramCoords == null) {
+	if (prevCoords == null) {
 	    if ((!mustInsertQueen(paramPiece.color)) || (paramPiece.type == QUEEN)) {
 		getInsertCoords(paramPiece.color);
 		return (HashSet<Coords>) insertCoords.clone();
 	    }
-	    return new HashSet();
+	    return new HashSet<Coords>();
 	}
 
 	if (!canMove(paramPiece.color))
-	    return new HashSet();
-	getNotAllowedCoords(paramCoords);
+	    return new HashSet<Coords>();
+	getNotAllowedCoords(prevCoords);
 	switch (paramPiece.type) {
 	    case QUEEN:
-		return (HashSet<Coords>) getTargetCoordsForQueen(paramCoords).clone();
+		return (HashSet<Coords>) getTargetCoordsForQueen(prevCoords).clone();
 	    case BEETLE:
-		return (HashSet<Coords>) getTargetCoordsForBeetle(paramCoords).clone();
+		return (HashSet<Coords>) getTargetCoordsForBeetle(prevCoords).clone();
 	    case ANT:
-		return (HashSet<Coords>) getTargetCoordsForAnt(paramCoords).clone();
+		return (HashSet<Coords>) getTargetCoordsForAnt(prevCoords).clone();
 	    case SPIDER:
-		return (HashSet<Coords>) getTargetCoordsForSpider(paramCoords).clone();
+		return (HashSet<Coords>) getTargetCoordsForSpider(prevCoords).clone();
 	    case HOPPER:
-		return (HashSet<Coords>) getTargetCoordsForHopper(paramCoords).clone();
+		return (HashSet<Coords>) getTargetCoordsForHopper(prevCoords).clone();
 	}
 
 	return null;
@@ -443,7 +443,6 @@ public final class Game implements Constants {
 	getBusyCoords();
 
 	resultSet.clear();
-	boolean bool = table.countPiecesAt(coords) > 1;
 
 	if (hasFreedom(coords))
 	    for (int j = 0; j < 6; j++) {

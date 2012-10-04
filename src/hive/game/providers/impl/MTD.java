@@ -1,5 +1,10 @@
-package hive.game;
+package hive.game.providers.impl;
 
+import hive.game.Constants;
+import hive.game.Game;
+import hive.game.Move;
+import hive.game.SimpleMoveComparator;
+import hive.game.TableRepresentation;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -93,7 +98,7 @@ public abstract class MTD implements Constants {
             foundMove = localMove;
     }
 
-    private final boolean isUseful(Move paramMove, int paramInt) {
+    private boolean isUseful(Move paramMove, int paramInt) {
         return true;
     }
 

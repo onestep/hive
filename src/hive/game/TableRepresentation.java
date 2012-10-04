@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public final class TableRepresentation implements Constants {
 
-    private byte[] rep;
+    public byte[] rep;
     private int hash;
     private static TableRepresentation KEY = new TableRepresentation();
     private static Coords zero = Coords.instance(0, 0);

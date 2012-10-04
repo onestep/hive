@@ -1,11 +1,11 @@
 package hive.game;
 
-import hive.game.providers.OpeningDBMoveProvider;
-import hive.game.providers.impl.OpeningDB;
 import hive.event.HiveMouseAdapter;
 import hive.event.HiveMouseEvent;
 import hive.event.HiveMouseListener;
 import hive.game.providers.NegaMaxMoveProvider;
+import hive.game.providers.OpeningDBMoveProvider;
+import hive.game.providers.impl.OpeningDB;
 import hive.gui.*;
 import hive.intf.MoveHighlighter;
 import hive.intf.MoveProvider;
@@ -349,7 +349,7 @@ public class MainApplet extends JFrame
     @Override
     public void startThinking(int paramInt) {
         thinkingWindow.setLocationRelativeTo(boxPane[paramInt]);
-        thinkingWindow.show();
+        thinkingWindow.setVisible(true);
         anim.start();
     }
 

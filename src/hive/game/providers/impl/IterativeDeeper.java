@@ -2,8 +2,7 @@ package hive.game.providers.impl;
 
 import java.io.PrintStream;
 
-public final class IterativeDeeper
-        implements Runnable {
+public final class IterativeDeeper implements Runnable {
 
     private int depth;
     private PrintStream old_out;
@@ -15,10 +14,11 @@ public final class IterativeDeeper
     private long milisec;
     private int color;
 
-    public IterativeDeeper(MTD paramMTD) {
-        this.mtd = paramMTD;
+    public IterativeDeeper(MTD mtd) {
+        this.mtd = mtd;
     }
 
+    @Override
     public void run() {
         this.depth = (this.startingDepth + this.increment);
         while (true) {

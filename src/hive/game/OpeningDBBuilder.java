@@ -1,16 +1,16 @@
 package hive.game;
 
-import hive.game.providers.impl.OpeningDB;
-import hive.intf.MoveHighlighter;
-import hive.intf.MoveProvider;
 import hive.event.HiveMouseAdapter;
 import hive.event.HiveMouseEvent;
 import hive.event.HiveMouseListener;
+import hive.game.providers.impl.OpeningDB;
 import hive.gui.GameThread;
 import hive.gui.HiveLabel;
 import hive.gui.HivePane;
 import hive.gui.HivePopupMenu;
 import hive.gui.HiveScrollPane;
+import hive.intf.MoveHighlighter;
+import hive.intf.MoveProvider;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -421,7 +421,7 @@ public class OpeningDBBuilder extends JFrame
 
     public static void main(String[] paramArrayOfString) {
         OpeningDBBuilder builder = new OpeningDBBuilder();
-        builder.show();
+        builder.setVisible(true);
     }
 
     public void actionPerformed(ActionEvent paramActionEvent) {

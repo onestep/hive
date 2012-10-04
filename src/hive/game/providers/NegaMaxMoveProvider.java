@@ -1,46 +1,40 @@
 package hive.game.providers;
 
-import hive.game.providers.impl.NegaMaxAB;
 import hive.game.Game;
 import hive.game.Move;
+import hive.game.providers.impl.NegaMaxAB;
 import hive.intf.MoveProvider;
 import hive.intf.Thinker;
 
-public class NegaMaxMoveProvider
-  implements MoveProvider
-{
-  private Thinker thinker;
-  private Game g;
-  private NegaMaxAB negamax;
+public class NegaMaxMoveProvider implements MoveProvider {
 
-  public NegaMaxMoveProvider(Game paramGame, Thinker paramThinker)
-  {
-    this.g = paramGame;
-    this.thinker = paramThinker;
-    this.negamax = new NegaMaxAB(paramGame, paramThinker);
-  }
+    private Thinker thinker;
+    private Game g;
+    private NegaMaxAB negamax;
 
-  public Move findMove(Game paramGame, int paramInt)
-  {
-    if (this.g != paramGame) {
-      this.g = paramGame;
-      this.negamax = new NegaMaxAB(paramGame, this.thinker);
+    public NegaMaxMoveProvider(Game paramGame, Thinker paramThinker) {
+	this.g = paramGame;
+	this.thinker = paramThinker;
+	this.negamax = new NegaMaxAB(paramGame, paramThinker);
     }
-    return this.negamax.findMove(paramInt);
-  }
 
-  public void cleanUp()
-  {
-    this.negamax.interrupt();
-  }
+    public Move findMove(Game paramGame, int paramInt) {
+	if (this.g != paramGame) {
+	    this.g = paramGame;
+	    this.negamax = new NegaMaxAB(paramGame, this.thinker);
+	}
+	return this.negamax.findMove(paramInt);
+    }
 
-  public String getName()
-  {
-    return "Computer";
-  }
+    public void cleanUp() {
+	this.negamax.interrupt();
+    }
 
-  public void _break()
-  {
-    this.negamax.interrupt();
-  }
+    public String getName() {
+	return "Computer";
+    }
+
+    public void _break() {
+	this.negamax.interrupt();
+    }
 }

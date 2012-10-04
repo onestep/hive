@@ -1,4 +1,4 @@
-package hive.game.providers;
+package hive.game.providers.impl;
 
 import hive.game.*;
 import hive.intf.MoveHighlighter;
@@ -11,7 +11,7 @@ public class InteractiveNegaMaxAB implements Constants {
     private static final int MAX_DEPTH = 4;
     private Move foundMove;
     private Game game;
-    private Comparator comparator;
+    private Comparator<Move> comparator;
     private boolean interrupted;
     private MoveHighlighter highlighter;
 

@@ -14,7 +14,7 @@ public final class Table implements Constants {
     private int i_index;
     private boolean canIterate2;
     private static final Placement DEFAULT_EMPTY_PLACEMENT = new Placement(null);
-    private Map map;
+    private Map<Coords, Placement> map;
     Coords[][][] coordsIndex;
 
     public Table() {
@@ -32,7 +32,7 @@ public final class Table implements Constants {
         for (int j = 0; j < 2; j++)
             for (int k = 0; k < 5; k++)
                 coordsIndex[j][k] = new Coords[Constants.howManyPieces[k]];
-        this.map = new TreeMap();
+        map = new TreeMap<Coords, Placement>();
     }
 
     public void reset() {
