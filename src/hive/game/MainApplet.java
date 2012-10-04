@@ -1,5 +1,7 @@
 package hive.game;
 
+import hive.game.providers.OpeningDBMoveProvider;
+import hive.game.providers.impl.OpeningDB;
 import hive.event.HiveMouseAdapter;
 import hive.event.HiveMouseEvent;
 import hive.event.HiveMouseListener;

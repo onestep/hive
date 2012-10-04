@@ -1,6 +1,5 @@
-package hive.game.providers;
+package hive.game.providers.impl;
 
-import hive.game.MTD;
 import java.io.PrintStream;
 
 public final class IterativeDeeper

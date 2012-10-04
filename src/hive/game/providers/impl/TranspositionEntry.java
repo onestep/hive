@@ -1,5 +1,8 @@
-package hive.game;
+package hive.game.providers.impl;
 
+import hive.game.Constants;
+import hive.game.Move;
+import hive.game.TableRepresentation;
 import java.util.Collection;
 
 public final class TranspositionEntry implements Constants {

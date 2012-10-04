@@ -1,4 +1,6 @@
-package hive.game;
+package hive.game.providers.impl;
+
+import hive.game.Game;
 
 public class MTDf extends MTD {
 

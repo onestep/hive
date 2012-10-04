@@ -1,9 +1,8 @@
 package hive.game;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
-public final class TableRepresentation implements Constants, Serializable {
+public final class TableRepresentation implements Constants {
 
     private byte[] rep;
     private int hash;
@@ -11,13 +10,13 @@ public final class TableRepresentation implements Constants, Serializable {
     private static Coords zero = Coords.instance(0, 0);
     private static Coords[] _coords = new Coords[3];
 
-    TableRepresentation(Table table) {
+    public TableRepresentation(Table table) {
         rep = new byte[54];
         countTableRepresentation(table, rep);
         hash = UniversalHash.hashByteArray(rep, 0);
     }
 
-    TableRepresentation(byte[] rep) {
+    public TableRepresentation(byte[] rep) {
         this.rep = new byte[54];
         System.arraycopy(rep, 0, this.rep, 0, 54);
         hash = UniversalHash.hashByteArray(this.rep, 0);
@@ -33,7 +32,7 @@ public final class TableRepresentation implements Constants, Serializable {
         return KEY;
     }
 
-    public static final void countTableRepresentation(Table table, byte[] rep) {
+    public static void countTableRepresentation(Table table, byte[] rep) {
         if (rep.length != 54)
             throw new IllegalArgumentException("Bad array length");
         int i = 0;
@@ -43,7 +42,7 @@ public final class TableRepresentation implements Constants, Serializable {
                 i = getCoords(table, pieces[j][k], rep, i);
     }
 
-    private static final int getCoords(Table table, Piece piece, byte[] rep, int pos) {
+    private static int getCoords(Table table, Piece piece, byte[] rep, int pos) {
         int i = 0;
         for (int j = 0; j < howManyPieces[piece.type]; j++) {
             _coords[j] = table.coordsIndex[piece.color][piece.type][j];

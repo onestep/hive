@@ -1,5 +1,6 @@
 package hive.game;
 
+import hive.game.providers.impl.OpeningDB;
 import hive.intf.MoveHighlighter;
 import hive.intf.MoveProvider;
 import hive.event.HiveMouseAdapter;

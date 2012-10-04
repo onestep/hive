@@ -1,5 +1,6 @@
 package hive.game.providers;
 
+import hive.game.providers.impl.NegaMaxAB;
 import hive.game.Game;
 import hive.game.Move;
 import hive.intf.MoveProvider;

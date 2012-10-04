@@ -1,5 +1,9 @@
 package hive.game.providers;
 
+import hive.game.providers.impl.MTD;
+import hive.game.providers.impl.IterativeDeeper;
+import hive.game.providers.impl.TranspositionTable;
+import hive.game.providers.impl.MTDf;
 import hive.game.*;
 import hive.intf.MoveProvider;
 
