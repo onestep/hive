@@ -1,10 +1,6 @@
 package hive.game.providers;
 
-import hive.game.Constants;
-import hive.game.Coords;
-import hive.game.Game;
-import hive.game.Move;
-import hive.game.SimpleMoveComparator;
+import hive.game.*;
 import hive.intf.Thinker;
 import java.util.Collection;
 import java.util.Comparator;
@@ -71,17 +67,17 @@ public class NegaMaxAB implements Constants {
 	}
     }
 
-    private int negaMaxABTop(int paramInt1, int paramInt2, int paramInt3, int paramInt4, boolean paramBoolean) {
-	if ((paramInt2 == 4) || game.isWin(paramInt1) || game.isWin(Game.opponent(paramInt1)))
-	    return game.evaluate(paramInt1);
-	int i = -1000000000;
+    private int negaMaxABTop(int color, int depth, int paramInt3, int paramInt4, boolean paramBoolean) {
+	if ((depth == MAX_DEPTH) || game.isWin(BLUE) || game.isWin(SILVER))
+	    return game.evaluate(color);
+	int i = -INFINITY;
 	int j = i;
 
-	Collection localCollection = game.getMoves(paramInt1, comparator);
+	Collection localCollection = game.getMoves(color, comparator);
 	System.out.println("Branching factor:" + new Integer(localCollection.size()));
 
 	if (localCollection.isEmpty())
-	    return -negaMaxAB(Game.opponent(paramInt1), paramInt2, -paramInt4, -paramInt3, false);
+	    return -negaMaxAB(Game.opponent(color), depth, -paramInt4, -paramInt3, false);
 	Iterator localIterator = localCollection.iterator();
 
 	while (localIterator.hasNext() && (!interrupted) && (i < paramInt4)) {
@@ -89,9 +85,9 @@ public class NegaMaxAB implements Constants {
 	    if (i > paramInt3)
 		paramInt3 = i;
 
-	    if ((check(move, paramInt2, paramBoolean)) || (i == -1000000000)) {
+	    if ((check(move, depth, paramBoolean)) || (i == -1000000000)) {
 		game.doMove(move);
-		j = -negaMaxAB(Game.opponent(paramInt1), paramInt2 + 1, -paramInt4, -paramInt3, true);
+		j = -negaMaxAB(Game.opponent(color), depth + 1, -paramInt4, -paramInt3, true);
 		game.unDoMove(move);
 	    }
 

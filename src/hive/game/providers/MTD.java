@@ -5,24 +5,19 @@ import java.util.Iterator;
 
 public abstract class MTD implements Constants {
 
-    protected TranspositionTable tTable;
-    Game game;
+    private TranspositionTable tTable;
+    private Game game;
     public Move foundMove = null;
-
     protected int foundMinMaxValue = 0;
     protected int forColor = -1;
-
     private boolean interrupted;
-
     private int tTUsed;
     private int cutOffs;
     private int ETCCutoffs;
     private int total;
     private int tTOrderingWorks;
-    private int searchDepth;
     private int driverPasses;
     private int ETCResult;
-    
     private SimpleMoveComparator comparator;
 
     public MTD(Game game, TranspositionTable table) {
@@ -57,8 +52,6 @@ public abstract class MTD implements Constants {
         Move localMove = foundMove;
         interrupted = false;
 
-        searchDepth = depth;
-
         driverPasses = 0;
 
         System.out.println("********* MTD Routine***************");
@@ -73,10 +66,10 @@ public abstract class MTD implements Constants {
             else
                 L = g;
 
-            driverPasses += 1;
+            driverPasses++;
 
             G = next(L, H, g);
-        } while ((H > L) && (!this.interrupted));
+        } while ((H > L) && (!interrupted));
 
         System.out.println("driver passes " + driverPasses);
 
@@ -108,7 +101,7 @@ public abstract class MTD implements Constants {
         Move ETCMove = null;
 
         Iterator it = moves.iterator();
-        while (it.hasNext() && (!this.interrupted)) {
+        while (it.hasNext() && (!interrupted)) {
             Move move = (Move) it.next();
             game.doMove(move);
 
@@ -139,31 +132,31 @@ public abstract class MTD implements Constants {
         Move entryMove = null;
 
         if (entry != null) {
-            int i = entry.getLowerBound(color, depth);
-            int j = entry.getUpperBound(color, depth);
+            int lowerBound = entry.getLowerBound(color, depth);
+            int upperBound = entry.getUpperBound(color, depth);
 
             foundMove = entry.getMove(color);
 
-            if (this.foundMove != null)
-                if (i < j) {
-                    if (i > bound) {
-                        this.cutOffs += 1;
-                        this.tTUsed += 1;
+            if (foundMove != null)
+                if (lowerBound < upperBound) {
+                    if (lowerBound > bound) {
+                        cutOffs++;
+                        tTUsed++;
 
                         entry.cutoff = true;
-                        return i;
+                        return lowerBound;
                     }
-                    if (j < bound) {
-                        this.tTUsed += 1;
+                    if (upperBound < bound) {
+                        tTUsed++;
 
                         entry.cutoff = false;
-                        return j;
+                        return upperBound;
                     }
-                } else if (i == j) {
-                    this.tTUsed += 1;
-                    this.cutOffs += 1;
+                } else if (lowerBound == upperBound) {
+                    tTUsed++;
+                    cutOffs++;
 
-                    return i;
+                    return lowerBound;
                 }
 
             entryMove = entry.getMove(color);
@@ -190,7 +183,7 @@ public abstract class MTD implements Constants {
                 moves = entry.moves[color];
             Move ETCMove;
             if ((depth > 1) && ((ETCMove = ETC(bound, moves, depth, color)) != null)) {
-                ETCCutoffs += 1;
+                ETCCutoffs++;
                 foundMove = ETCMove;
                 return ETCResult;
             }
@@ -206,7 +199,7 @@ public abstract class MTD implements Constants {
 
             localObject = ETCMove;
 
-            while ((ETCMove != null) && (m < bound) && (!this.interrupted)) {
+            while ((ETCMove != null) && (m < bound) && (!interrupted)) {
                 if ((m == -INFINITY) || isUseful(ETCMove, 0)) {
                     game.doMove(ETCMove);
                     int k = -mt(-bound, depth - 1, color == 0 ? 1 : 0);
@@ -225,13 +218,13 @@ public abstract class MTD implements Constants {
 
             }
 
-            if (this.interrupted)
+            if (interrupted)
                 return 0;
 
             foundMove = localObject;
 
             if (foundMove == entry.getMove(color))
-                tTOrderingWorks += 1;
+                tTOrderingWorks++;
 
         }
 
@@ -251,7 +244,7 @@ public abstract class MTD implements Constants {
                 entry.setLowerBound(color, depth, m);
                 entry.cutoff = true;
 
-                cutOffs += 1;
+                cutOffs++;
             }
         }
 
@@ -273,21 +266,21 @@ public abstract class MTD implements Constants {
 
             if (lowerBound < upperBound) {
                 if (lowerBound > bound) {
-                    cutOffs += 1;
-                    tTUsed += 1;
+                    cutOffs++;
+                    tTUsed++;
 
                     entry.cutoff = true;
                     return lowerBound;
                 }
                 if (upperBound < bound) {
-                    tTUsed += 1;
+                    tTUsed++;
 
                     entry.cutoff = false;
                     return upperBound;
                 }
             } else if (lowerBound == upperBound) {
-                cutOffs += 1;
-                tTUsed += 1;
+                cutOffs++;
+                tTUsed++;
 
                 return lowerBound;
             }
@@ -315,40 +308,39 @@ public abstract class MTD implements Constants {
             } else
                 moves = entry.moves[color];
             if ((depth > 1) && (ETC(bound, moves, depth, color) != null)) {
-                ETCCutoffs += 1;
+                ETCCutoffs++;
                 return ETCResult;
             }
 
             Iterator it = moves.iterator();
 
-            Move localMove2;
+            Move ETCMove;
             if (entryMove != null)
-                localMove2 = entryMove;
+                ETCMove = entryMove;
             else if (it.hasNext())
-                localMove2 = (Move) it.next();
+                ETCMove = (Move) it.next();
             else
                 return -mt(-bound, depth, Game.opponent(color));
 
-            localObject = localMove2;
+            localObject = ETCMove;
 
-            while ((localMove2 != null) && (m < bound) && (!this.interrupted)) {
-                if ((m == -1000000000) || (isUseful(localMove2, 0))) {
-                    this.game.doMove(localMove2);
+            while ((ETCMove != null) && (m < bound) && (!this.interrupted)) {
+                if ((m == -INFINITY) || isUseful(ETCMove, 0)) {
+                    game.doMove(ETCMove);
                     int k = -mt(-bound, depth - 1, color == 0 ? 1 : 0);
 
-                    this.game.unDoMove(localMove2);
+                    game.unDoMove(ETCMove);
 
                     if (k > m) {
                         m = k;
-                        localObject = localMove2;
+                        localObject = ETCMove;
                     }
 
                 }
 
-                localMove2 = it.hasNext() ? (Move) it.next() : null;
-                if ((localMove2 != null)
-                        && (localMove2.equals(entryMove)))
-                    localMove2 = it.hasNext() ? (Move) it.next() : null;
+                ETCMove = it.hasNext() ? (Move) it.next() : null;
+                if ((ETCMove != null) && ETCMove.equals(entryMove))
+                    ETCMove = it.hasNext() ? (Move) it.next() : null;
 
             }
 
@@ -356,7 +348,7 @@ public abstract class MTD implements Constants {
                 return 0;
 
             if (localObject == entry.getMove(color))
-                tTOrderingWorks += 1;
+                tTOrderingWorks++;
         }
 
         if (n != 0) {
@@ -375,7 +367,7 @@ public abstract class MTD implements Constants {
                 entry.setLowerBound(color, depth, m);
                 entry.cutoff = true;
 
-                cutOffs += 1;
+                cutOffs++;
             }
         }
 
