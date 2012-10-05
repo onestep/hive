@@ -1,43 +1,21 @@
 package hive.game;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+public final class Move {
 
-public final class Move implements Constants, Cloneable, Serializable {
-
-    public transient Piece piece;
+    public final Piece piece;
     public final Coords prevCoords;
     public final Coords newCoords;
     private int hash;
 
-    private Move(Piece piece, Coords prevCoords, Coords newCoords) {
+    public Move(Piece piece, Coords prevCoords, Coords newCoords) {
         this.piece = piece;
         this.prevCoords = prevCoords;
         this.newCoords = newCoords;
         hash = (piece.hashCode() << 24 + (prevCoords != null ? prevCoords.hashCode() << 16 : 0) + newCoords.hashCode());
     }
 
-    public static final synchronized Move instance(Piece piece, Coords prevCoords, Coords newCoords) {
-        return new Move(piece, prevCoords, newCoords);
-    }
-
     public boolean isInsertion() {
         return prevCoords == null;
-    }
-
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-        out.writeInt(piece.color);
-        out.writeInt(piece.type);
-    }
-
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        int color = in.readInt();
-        int type = in.readInt();
-        piece = pieces[color][type];
     }
 
     @Override
@@ -52,11 +30,6 @@ public final class Move implements Constants, Cloneable, Serializable {
             return (piece == move.piece) && (prevCoords != null ? prevCoords.equals(move.prevCoords) : move.prevCoords == null) && newCoords.equals(move.newCoords);
         }
         return false;
-    }
-
-    @Override
-    public Object clone() {
-        return this;
     }
 
     @Override

@@ -1,8 +1,10 @@
 package hive.game;
 
+import static hive.game.Constants.QUEEN;
+import static hive.game.Constants.SILVER;
 import java.util.Comparator;
 
-public final class SimpleMoveComparator implements Comparator<Move>, Constants {
+public final class SimpleMoveComparator implements Comparator<Move> {
 
     private int[] piecePowerMovement = {0, 1, 2, 4, 3};
     private int[] piecePowerPutting = {0, 4, 3, 1, 2};
@@ -15,7 +17,7 @@ public final class SimpleMoveComparator implements Comparator<Move>, Constants {
     }
 
     private void initComparison(int color) {
-	opponentQueen = game.table.firstCoordsForPiece(Constants.pieces[SILVER][QUEEN]);
+	opponentQueen = game.table.firstCoordsForPiece(Piece.pieces[SILVER][QUEEN]);
 	if (opponentQueen != null)
 	    beetleOnOpponentQueen = (game.table.getPieceAt(opponentQueen).color == color);
 	else
@@ -41,10 +43,9 @@ public final class SimpleMoveComparator implements Comparator<Move>, Constants {
     private int compareBlockingQueen(Move move1, Move move2) {
 	if (opponentQueen == null)
 	    return 0;
-	/* TODO: check for wrong equals */
 	return (move1.newCoords.equals(opponentQueen)
-		? !move2.equals(opponentQueen) ? -1 : 0
-		: move2.equals(opponentQueen) ? 1 : 0);
+		? !move2.newCoords.equals(opponentQueen) ? -1 : 0
+		: move2.newCoords.equals(opponentQueen) ? 1 : 0);
     }
 
     private int compareMoving(Move move1, Move move2) {

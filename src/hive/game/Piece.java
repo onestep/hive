@@ -1,12 +1,22 @@
 package hive.game;
 
-public final class Piece implements Constants {
+public final class Piece {
+
+    public static final Piece[][] pieces;
+
+    static {
+        pieces = new Piece[2][];
+        for (int color = 0; color < 2; color++) {
+            pieces[color] = new Piece[5];
+            for (int type = 0; type < 5; type++)
+                pieces[color][type] = new Piece(type, color);
+        }
+    }
 
     public final int type;
     public final int color;
-    private transient String name = null;
     private int hash;
-    public static final Piece[][] pieces = new Piece[2][];
+    private String name = null;
 
     private Piece(int type, int color) {
         this.type = type;
@@ -30,16 +40,8 @@ public final class Piece implements Constants {
     public boolean equals(Object object) {
         if (object instanceof Piece) {
             Piece piece = (Piece) object;
-            return type == piece.type && color == piece.color;
+            return (type == piece.type) && (color == piece.color);
         }
         return false;
-    }
-
-    static {
-        for (int i = 0; i < 2; i++) {
-            pieces[i] = new Piece[5];
-            for (int j = 0; j < 5; j++)
-                pieces[i][j] = new Piece(j, i);
-        }
     }
 }

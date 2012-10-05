@@ -9,10 +9,10 @@ public final class Table implements Constants {
     int modCount;
     private int _size;
     private boolean canIterate;
+    private boolean canIterate2;
     private Iterator i;
     private Piece pieceToIterate;
     private int i_index;
-    private boolean canIterate2;
     private static final Placement DEFAULT_EMPTY_PLACEMENT = new Placement(null);
     private Map<Coords, Placement> map;
     public Coords[][][] coordsIndex;
@@ -37,7 +37,7 @@ public final class Table implements Constants {
         canIterate2 = false;
         _size = 0;
         map.clear();
-        modCount += 1;
+        modCount++;
 
 	coordsIndex = new Coords[2][][];
         coordsIndex[0] = new Coords[5][];
@@ -47,8 +47,8 @@ public final class Table implements Constants {
                 coordsIndex[color][type] = new Coords[Constants.howManyPieces[type]];
     }
 
-    public final Piece getPieceAt(Coords paramCoords, int paramInt) {
-        return getPlacement(paramCoords).getPiece(paramInt);
+    public final Piece getPieceAt(Coords coords, int z) {
+        return getPlacement(coords).getPiece(z);
     }
 
     public final Piece getPieceAt(Coords coords) {
@@ -59,38 +59,38 @@ public final class Table implements Constants {
         return getPlacement(coords).count();
     }
 
-    public final void putPieceAt(Coords paramCoords, Piece paramPiece) {
-        Placement localPlacement = (Placement) map.get(paramCoords);
-        if (null == localPlacement) {
-            localPlacement = new Placement(paramPiece);
-            map.put(paramCoords, localPlacement);
+    public final void putPieceAt(Coords coords, Piece piece) {
+        Placement placement = (Placement) map.get(coords);
+        if (placement == null) {
+            placement = new Placement(piece);
+            map.put(coords, placement);
         } else
-            localPlacement.putPiece(paramPiece);
+            placement.putPiece(piece);
         canIterate = false;
         canIterate2 = false;
 
-        for (int j = 0; j < Constants.howManyPieces[paramPiece.type]; j++)
-            if (coordsIndex[paramPiece.color][paramPiece.type][j] == null) {
-                coordsIndex[paramPiece.color][paramPiece.type][j] = paramCoords;
+        for (int j = 0; j < Constants.howManyPieces[piece.type]; j++)
+            if (coordsIndex[piece.color][piece.type][j] == null) {
+                coordsIndex[piece.color][piece.type][j] = coords;
                 break;
             }
-        _size += 1;
-        modCount += 1;
+        _size++;
+        modCount++;
     }
 
-    public final Piece removePieceAt(Coords paramCoords) {
-        Piece localPiece = getPlacement(paramCoords).remove();
+    public final Piece removePieceAt(Coords coords) {
+        Piece piece = getPlacement(coords).remove();
 
-        for (int j = 0; j < Constants.howManyPieces[localPiece.type]; j++)
-            if (paramCoords.equals(coordsIndex[localPiece.color][localPiece.type][j])) {
-                coordsIndex[localPiece.color][localPiece.type][j] = null;
+        for (int j = 0; j < Constants.howManyPieces[piece.type]; j++)
+            if (coords.equals(coordsIndex[piece.color][piece.type][j])) {
+                coordsIndex[piece.color][piece.type][j] = null;
                 break;
             }
         canIterate = false;
         canIterate2 = false;
-        _size -= 1;
-        modCount += 1;
-        return localPiece;
+        _size--;
+        modCount++;
+        return piece;
     }
 
     public int size() {
@@ -98,50 +98,50 @@ public final class Table implements Constants {
     }
 
     public Coords firstCoords() {
-        this.i = this.map.keySet().iterator();
-        Coords localCoords;
+        i = map.keySet().iterator();
+        Coords coords;
         do {
-            this.canIterate = this.i.hasNext();
-            if (!this.canIterate)
+            canIterate = i.hasNext();
+            if (!canIterate)
                 return null;
-            localCoords = (Coords) this.i.next();
-        } while (countPiecesAt(localCoords) < 1);
-        return localCoords;
+            coords = (Coords) i.next();
+        } while (countPiecesAt(coords) < 1);
+        return coords;
     }
 
     public Coords nextCoords() {
-        if (!this.canIterate)
+        if (!canIterate)
             throw new IllegalStateException();
-        Coords localCoords;
+        Coords coords;
         do {
-            this.canIterate = this.i.hasNext();
-            if (!this.canIterate)
+            canIterate = i.hasNext();
+            if (!canIterate)
                 return null;
-            localCoords = (Coords) this.i.next();
-        } while (countPiecesAt(localCoords) < 1);
-        return localCoords;
+            coords = (Coords) i.next();
+        } while (countPiecesAt(coords) < 1);
+        return coords;
     }
 
-    public Coords firstCoordsForPiece(Piece paramPiece) {
-        this.pieceToIterate = paramPiece;
-        for (this.i_index = 0; this.i_index < Constants.howManyPieces[paramPiece.type]; this.i_index += 1)
-            if (this.coordsIndex[paramPiece.color][paramPiece.type][this.i_index] != null) {
-                this.canIterate2 = true;
-                return this.coordsIndex[paramPiece.color][paramPiece.type][(this.i_index++)];
+    public Coords firstCoordsForPiece(Piece piece) {
+        pieceToIterate = piece;
+        for (i_index = 0; i_index < Constants.howManyPieces[piece.type]; i_index++)
+            if (coordsIndex[piece.color][piece.type][i_index] != null) {
+                canIterate2 = true;
+                return coordsIndex[piece.color][piece.type][i_index++];
             }
-        this.canIterate2 = false;
+        canIterate2 = false;
         return null;
     }
 
     public Coords nextCoordsForPiece() {
-        if (!this.canIterate2)
+        if (!canIterate2)
             throw new IllegalStateException();
-        for (; this.i_index < Constants.howManyPieces[this.pieceToIterate.type]; this.i_index += 1)
-            if (this.coordsIndex[this.pieceToIterate.color][this.pieceToIterate.type][this.i_index] != null) {
-                this.canIterate2 = true;
-                return this.coordsIndex[this.pieceToIterate.color][this.pieceToIterate.type][(this.i_index++)];
+        for (; i_index < Constants.howManyPieces[pieceToIterate.type]; i_index++)
+            if (coordsIndex[pieceToIterate.color][pieceToIterate.type][i_index] != null) {
+                canIterate2 = true;
+                return coordsIndex[pieceToIterate.color][pieceToIterate.type][i_index++];
             }
-        this.canIterate2 = false;
+        canIterate2 = false;
         return null;
     }
 
@@ -176,8 +176,8 @@ public final class Table implements Constants {
         private int howManyUnder = 0;
         private Piece[] piecesUnder;
 
-        public Placement(Piece paramPiece) {
-            this.piece = paramPiece;
+        public Placement(Piece piece) {
+            this.piece = piece;
         }
 
         public final boolean isEmpty() {
@@ -190,7 +190,7 @@ public final class Table implements Constants {
 
         public final Piece remove() {
             Piece localPiece = this.piece;
-            this.piece = (howManyUnder > 0 ? piecesUnder[(--howManyUnder)] : null);
+            this.piece = (howManyUnder > 0 ? piecesUnder[--howManyUnder] : null);
             return localPiece;
         }
 
@@ -204,16 +204,16 @@ public final class Table implements Constants {
         }
 
         public final Piece getPiece() {
-            return this.piece;
+            return piece;
         }
 
-        public final void putPiece(Piece paramPiece) {
-            if ((this.piece != null) && (paramPiece != null)) {
-                if (this.piecesUnder == null)
-                    this.piecesUnder = new Piece[4];
-                this.piecesUnder[(this.howManyUnder++)] = this.piece;
+        public final void putPiece(Piece piece) {
+            if ((this.piece != null) && (piece != null)) {
+                if (piecesUnder == null)
+                    piecesUnder = new Piece[4];
+                piecesUnder[howManyUnder++] = this.piece;
             }
-            this.piece = paramPiece;
+            this.piece = piece;
         }
     }
 }

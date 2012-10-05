@@ -42,7 +42,7 @@ public class InteractiveNegaMaxAB implements Constants {
         }
     }
 
-    private boolean check(Move move, int paramInt, boolean paramBoolean) {
+    private boolean check(Move move, int depth, boolean paramBoolean) {
         if (!paramBoolean)
             return true;
 
@@ -50,15 +50,15 @@ public class InteractiveNegaMaxAB implements Constants {
         boolean i = coords != null ? false : game.table.getPieceAt(coords).color == move.piece.color;
         boolean bool = (i && (coords.getEdge(move.newCoords) >= 0)) || (!move.isInsertion());
 
-        switch (paramInt) {
+        switch (depth) {
             case 0:
             case 1:
                 return true;
             case 2:
                 return bool;
-            case 3:
+            default:
+                return bool && (move.piece.type != ANT);
         }
-        return bool && (move.piece.type != ANT);
     }
 
     private int negaMaxABTop(int color, int depth, int a, int b, boolean paramBoolean) {
@@ -67,18 +67,18 @@ public class InteractiveNegaMaxAB implements Constants {
         int i = -INFINITY;
         int j = i;
 
-        Collection localCollection = game.getMoves(color, comparator);
+        Collection moves = game.getMoves(color, comparator);
 
-        if (localCollection.isEmpty())
+        if (moves.isEmpty())
             return -negaMaxAB(Game.opponent(color), depth, -b, -a, false);
-        Iterator localIterator = localCollection.iterator();
+        Iterator it = moves.iterator();
 
-        while (localIterator.hasNext() && (!interrupted) && (i < b)) {
-            Move move = (Move) localIterator.next();
+        while (it.hasNext() && (!interrupted) && (i < b)) {
+            Move move = (Move) it.next();
             if (i > a)
                 a = i;
 
-            if ((check(move, depth, paramBoolean)) || (i == -INFINITY)) {
+            if (check(move, depth, paramBoolean) || (i == -INFINITY)) {
                 game.doMove(move);
                 highlighter.highlightAfter(move);
                 j = -negaMaxAB(Game.opponent(color), depth + 1, -b, -a, true);

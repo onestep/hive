@@ -42,9 +42,9 @@ public final class TableRepresentation implements Constants {
             throw new IllegalArgumentException("Bad array length");
         int i = 0;
 
-        for (int j = 0; j <= 1; j++)
-            for (int k = 0; k < 5; k++)
-                i = getCoords(table, pieces[j][k], rep, i);
+        for (int color = 0; color < 2; color++)
+            for (int type = 0; type < 5; type++)
+                i = getCoords(table, Piece.pieces[color][type], rep, i);
     }
 
     private static int getCoords(Table table, Piece piece, byte[] rep, int pos) {

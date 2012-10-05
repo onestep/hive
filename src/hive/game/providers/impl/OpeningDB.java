@@ -1,6 +1,6 @@
 package hive.game.providers.impl;
 
-import hive.game.Constants;
+import static hive.game.Constants.SILVER;
 import hive.game.Coords;
 import hive.game.Game;
 import hive.game.Move;
@@ -9,7 +9,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class OpeningDB implements Serializable, Constants {
+public class OpeningDB {
 
     private HashMap<TableRepresentation, HashSet<Move>> map;
 
@@ -27,7 +27,7 @@ public class OpeningDB implements Serializable, Constants {
 		byte type = (byte) in.read();
 		byte c1 = (byte) in.read();
 		byte c2 = (byte) in.read();
-		moves.add(Move.instance(Constants.pieces[SILVER][type], null, Coords.instance(c1, c2)));
+		moves.add(new Move(Piece.pieces[SILVER][type], null, Coords.instance(c1, c2)));
 	    }
 	    db.map.put(new TableRepresentation(rep), moves);
 	}
@@ -86,17 +86,15 @@ public class OpeningDB implements Serializable, Constants {
 	if (move.prevCoords != null)
 	    prevCoords = rotateCoordsOnce(move.prevCoords);
 	Coords newCoords = rotateCoordsOnce(move.newCoords);
-	return Move.instance(piece, prevCoords, newCoords);
+	return new Move(piece, prevCoords, newCoords);
     }
 
     private Game rotateGameOnce(Game game) {
 	Game rotatedGame = new Game();
 	for (Coords coords = game.table.firstCoords(); coords != null; coords = game.table.nextCoords()) {
 	    Coords rotatedCoords = rotateCoordsOnce(coords);
-	    for (int i = game.table.countPiecesAt(coords) - 1; i >= 0; i--) {
-		Move move = Move.instance(game.table.getPieceAt(coords, i), null, rotatedCoords);
-		rotatedGame.doMove(move);
-	    }
+	    for (int i = game.table.countPiecesAt(coords) - 1; i >= 0; i--)
+		rotatedGame.doMove(new Move(game.table.getPieceAt(coords, i), null, rotatedCoords));
 	}
 	return rotatedGame;
     }

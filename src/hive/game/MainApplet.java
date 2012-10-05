@@ -491,7 +491,7 @@ public class MainApplet extends JFrame
 
     @Override
     public void highlightWin(int i) {
-        final Coords winCoords = game.table.firstCoordsForPiece(Constants.pieces[i > 0 ? 0 : 1][0]);
+        final Coords winCoords = game.table.firstCoordsForPiece(Piece.pieces[i > 0 ? 0 : 1][0]);
         SwingUtilities.invokeLater(new Runnable() {
 
             @Override
@@ -563,39 +563,39 @@ public class MainApplet extends JFrame
                 j = -boxPane[i].getCellWidth() / 2 - 13;
             int k = 0;
             for (int m = 0; m < 5; m++) {
-                int n = coordC2FromPieceType(pieces[i][m]);
+                int n = coordC2FromPieceType(Piece.pieces[i][m]);
                 labels[i][m] = new HiveLabel(k, n, j, 0, new Integer(game.box.howMany(i, m)).toString());
                 boxPane[i].addVisibleObject(labels[i][m]);
             }
         }
     }
 
-    public void updateBoxPane(int paramInt) {
-        if (!game.box.contains(pieces[paramInt][0]))
-            boxPane[paramInt].setHivePiece(0, 0, 0);
-        if (!game.box.contains(pieces[paramInt][2]))
-            boxPane[paramInt].setHivePiece(0, 2, 0);
-        if (!game.box.contains(pieces[paramInt][1]))
-            boxPane[paramInt].setHivePiece(0, -2, 0);
-        if (!game.box.contains(pieces[paramInt][4]))
-            boxPane[paramInt].setHivePiece(0, 4, 0);
-        if (!game.box.contains(pieces[paramInt][3]))
-            boxPane[paramInt].setHivePiece(0, -4, 0);
+    public void updateBoxPane(int color) {
+        if (!game.box.contains(Piece.pieces[color][QUEEN]))
+            boxPane[color].setHivePiece(0, 0, 0);
+        if (!game.box.contains(Piece.pieces[color][BEETLE]))
+            boxPane[color].setHivePiece(0, 2, 0);
+        if (!game.box.contains(Piece.pieces[color][SPIDER]))
+            boxPane[color].setHivePiece(0, -2, 0);
+        if (!game.box.contains(Piece.pieces[color][HOPPER]))
+            boxPane[color].setHivePiece(0, 4, 0);
+        if (!game.box.contains(Piece.pieces[color][ANT]))
+            boxPane[color].setHivePiece(0, -4, 0);
         int i;
-        if (paramInt == 0)
-            i = boxPane[paramInt].getCellWidth() / 2 + 5;
+        if (color == 0)
+            i = boxPane[color].getCellWidth() / 2 + 5;
         else
-            i = -boxPane[paramInt].getCellWidth() / 2 - 13;
+            i = -boxPane[color].getCellWidth() / 2 - 13;
         int j = 0;
-        for (int k = 0; k < 5; k++) {
-            int m = coordC2FromPieceType(pieces[paramInt][k]);
-            int n = game.box.howMany(paramInt, k);
+        for (int type = 0; type < 5; type++) {
+            int m = coordC2FromPieceType(Piece.pieces[color][type]);
+            int n = game.box.howMany(color, type);
             String str;
             if (n > 0)
                 str = new Integer(n).toString();
             else
                 str = " ";
-            labels[paramInt][k].setText(str);
+            labels[color][type].setText(str);
         }
     }
 
@@ -818,7 +818,7 @@ public class MainApplet extends JFrame
                     boolean bool = false;
                     if (event.sender == tablePane) {
                         newCoords = Coords.instance(event.getP(), event.getQ());
-                        move = Move.instance(piece, prevCoords, newCoords);
+                        move = new Move(piece, prevCoords, newCoords);
                         if (availableMoves.contains(move))
                             bool = true;
                         else if (!game.mustInsertQueen(color))
@@ -876,7 +876,7 @@ public class MainApplet extends JFrame
                         boxPane[0].clearHighlights();
                         boxPane[1].clearHighlights();
 
-                        piece = Constants.pieces[color][i];
+                        piece = Piece.pieces[color][i];
                         prevCoords = null;
 
                         boxPane[color].setHighlight(event.getP(), event.getQ(), Color.blue, 3.0F, true);

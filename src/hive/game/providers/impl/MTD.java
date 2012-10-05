@@ -48,8 +48,8 @@ public abstract class MTD implements Constants {
     }
 
     public final synchronized void search(int color, int depth) {
-        int H = INFINITY + 1;
-        int L = -(INFINITY + 1);
+        int upperBound = INFINITY + 1;
+        int lowerBound = -(INFINITY + 1);
         int g;
         int G = g = first(color);
 
@@ -66,14 +66,14 @@ public abstract class MTD implements Constants {
             g = mtTopMost(G - 1, depth, color);
 
             if (g < G)
-                H = g;
+                upperBound = g;
             else
-                L = g;
+                lowerBound = g;
 
             driverPasses++;
 
-            G = next(L, H, g);
-        } while ((H > L) && (!interrupted));
+            G = next(lowerBound, upperBound, g);
+        } while ((upperBound > lowerBound) && (!interrupted));
 
         System.out.println("driver passes " + driverPasses);
 
@@ -345,7 +345,6 @@ public abstract class MTD implements Constants {
                 ETCMove = it.hasNext() ? (Move) it.next() : null;
                 if ((ETCMove != null) && ETCMove.equals(entryMove))
                     ETCMove = it.hasNext() ? (Move) it.next() : null;
-
             }
 
             if (interrupted)

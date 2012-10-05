@@ -77,15 +77,15 @@ public class GameProcess implements Constants {
                 finish();
 
             if (wins[0] ^ wins[1]) {
-                out.println((wins[0] ? names[0] : names[1]) + " wins !!!");
-                h.highlightWin(wins[0] ? 0 : 1);
-            } else if (wins[0]) {
-                h.highlightWin(0);
-                h.highlightWin(1);
+                out.println((wins[BLUE] ? names[BLUE] : names[SILVER]) + " wins !!!");
+                h.highlightWin(wins[BLUE] ? BLUE : SILVER);
+            } else if (wins[BLUE]) {
+                h.highlightWin(BLUE);
+                h.highlightWin(SILVER);
                 out.println("ending on draw !!!");
             }
         }
 
-        curColor = curColor > 0 ? 0 : 1;
+        curColor = curColor > BLUE ? BLUE : SILVER;
     }
 }

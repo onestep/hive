@@ -1,8 +1,9 @@
 package hive.game;
 
+import static hive.game.Constants.*;
 import java.util.*;
 
-public final class Game implements Constants {
+public final class Game {
 
     public Box box;
     public Table table;
@@ -81,8 +82,8 @@ public final class Game implements Constants {
 			    System.out.println("Zly typ pionka");
 		    }
 
-		    for (Coords targetCoord : targetCoords)
-			moveSet.add(Move.instance(piece, busyCoord, targetCoord));
+		    for (Coords coords : targetCoords)
+			moveSet.add(new Move(piece, busyCoord, coords));
 		}
 	    }
 
@@ -90,32 +91,32 @@ public final class Game implements Constants {
 
 	for (Piece piece = box.first(color); piece != null; piece = box.next())
 	    if ((!mustInsertQueen(color)) || (piece.type == QUEEN))
-		for (Coords insertCoord : this.insertCoords)
-		    moveSet.add(Move.instance(piece, null, insertCoord));
+		for (Coords coords : this.insertCoords)
+		    moveSet.add(new Move(piece, null, coords));
 
 	return moveSet;
     }
 
-    public Set<Move> getMoves(int paramInt) {
-	return getMoves(paramInt, null);
+    public Set<Move> getMoves(int color) {
+	return getMoves(color, null);
     }
 
-    public HashSet<Coords> getTargetCoords(Piece paramPiece, Coords prevCoords) {
+    public HashSet<Coords> getTargetCoords(Piece piece, Coords prevCoords) {
 	getBusyCoords();
 	getFreeCoords();
 
 	if (prevCoords == null) {
-	    if ((!mustInsertQueen(paramPiece.color)) || (paramPiece.type == QUEEN)) {
-		getInsertCoords(paramPiece.color);
+	    if ((!mustInsertQueen(piece.color)) || (piece.type == QUEEN)) {
+		getInsertCoords(piece.color);
 		return (HashSet<Coords>) insertCoords.clone();
 	    }
 	    return new HashSet<Coords>();
 	}
 
-	if (!canMove(paramPiece.color))
+	if (!canMove(piece.color))
 	    return new HashSet<Coords>();
 	getNotAllowedCoords(prevCoords);
-	switch (paramPiece.type) {
+	switch (piece.type) {
 	    case QUEEN:
 		return (HashSet<Coords>) getTargetCoordsForQueen(prevCoords).clone();
 	    case BEETLE:
@@ -173,14 +174,14 @@ public final class Game implements Constants {
     public final int halfEvaluate(int color) {
 	int i = 0;
 
-	Coords coords = table.firstCoordsForPiece(Constants.pieces[opponent(color)][0]);
+	Coords coords = table.firstCoordsForPiece(Piece.pieces[opponent(color)][QUEEN]);
 
 	getBusyCoords();
 	getFreeCoords();
 
 	if (coords != null)
 	    i = countNeighbours(coords);
-	if ((i < 6) && (canMove(color)))
+	if ((i < 6) && canMove(color))
 	    return neighbourCountLT[i] + (Constants.howManyPieces[ANT] - box.howMany(color, ANT)) << 1;
 	return neighbourCountLT[i];
     }
@@ -426,13 +427,13 @@ public final class Game implements Constants {
 	return bool && (i1 < i4 || n < i4);
     }
 
-    private HashSet<Coords> getTargetCoordsForQueen(Coords paramCoords) {
+    private HashSet<Coords> getTargetCoordsForQueen(Coords coords) {
 	resultSet.clear();
 
-	if (hasFreedom(paramCoords))
+	if (hasFreedom(coords))
 	    for (int i = 0; i < 6; i++) {
-		Coords localCoords = paramCoords.getNeighbour(i);
-		if ((!notAllowedCoords.contains(localCoords)) && (freeCoords.contains(localCoords)) && (isFreedomToMove(paramCoords, localCoords)))
+		Coords localCoords = coords.getNeighbour(i);
+		if ((!notAllowedCoords.contains(localCoords)) && (freeCoords.contains(localCoords)) && (isFreedomToMove(coords, localCoords)))
 		    resultSet.add(localCoords);
 	    }
 	return resultSet;
@@ -515,28 +516,28 @@ public final class Game implements Constants {
 	return resultSet;
     }
 
-    private HashSet<Coords> getTargetCoordsForSpider(Coords paramCoords) {
+    private HashSet<Coords> getTargetCoordsForSpider(Coords fromCoords) {
 	resultSet.clear();
 
-	if (hasFreedom(paramCoords)) {
-	    Piece localPiece = table.removePieceAt(paramCoords);
+	if (hasFreedom(fromCoords)) {
+	    Piece piece = table.removePieceAt(fromCoords);
 	    try {
-		spiderStep(paramCoords, resultSet, -1, 0);
+		spiderStep(fromCoords, resultSet, -1, 0);
 	    } finally {
-		table.putPieceAt(paramCoords, localPiece);
+		table.putPieceAt(fromCoords, piece);
 	    }
 	}
 	return resultSet;
     }
 
-    private void spiderStep(Coords paramCoords, Set<Coords> targetCoords, int paramInt1, int step) {
+    private void spiderStep(Coords fromCoords, Set<Coords> targetCoords, int paramInt1, int step) {
 	if (step == 3)
-	    targetCoords.add(paramCoords);
+	    targetCoords.add(fromCoords);
 	else
 	    for (int i = 0; i < 6; i++)
 		if (i != paramInt1) {
-		    Coords neighbour = paramCoords.getNeighbour(i);
-		    if ((table.countPiecesAt(neighbour) == 0) && isFreedomToMove(paramCoords, neighbour))
+		    Coords neighbour = fromCoords.getNeighbour(i);
+		    if ((table.countPiecesAt(neighbour) == 0) && isFreedomToMove(fromCoords, neighbour))
 			spiderStep(neighbour, targetCoords, (i + 3) % 6, step + 1);
 		}
     }

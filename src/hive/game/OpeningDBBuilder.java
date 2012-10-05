@@ -4,26 +4,11 @@ import hive.event.HiveMouseAdapter;
 import hive.event.HiveMouseEvent;
 import hive.event.HiveMouseListener;
 import hive.game.providers.impl.OpeningDB;
-import hive.gui.GameThread;
-import hive.gui.HiveLabel;
-import hive.gui.HivePane;
-import hive.gui.HivePopupMenu;
-import hive.gui.HiveScrollPane;
+import hive.gui.*;
 import hive.intf.MoveHighlighter;
 import hive.intf.MoveProvider;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Image;
-import java.awt.MediaTracker;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -33,14 +18,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import javax.swing.BorderFactory;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 public class OpeningDBBuilder extends JFrame
         implements Constants, MoveHighlighter, ActionListener {
@@ -176,7 +154,7 @@ public class OpeningDBBuilder extends JFrame
     }
 
     public void highlightWin(int paramInt) {
-        final Coords winCoords = this.game.table.firstCoordsForPiece(Constants.pieces[1][0]);
+        final Coords winCoords = this.game.table.firstCoordsForPiece(Piece.pieces[1][0]);
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 for (int i = 0; i < 6; i++) {
@@ -237,39 +215,39 @@ public class OpeningDBBuilder extends JFrame
                 j = -this.boxPane[i].getCellWidth() / 2 - 13;
             int k = 0;
             for (int m = 0; m < 5; m++) {
-                int n = coordC2FromPieceType(Constants.pieces[i][m]);
+                int n = coordC2FromPieceType(Piece.pieces[i][m]);
                 this.labels[i][m] = new HiveLabel(k, n, j, 0, new Integer(this.game.box.howMany(i, m)).toString());
                 this.boxPane[i].addVisibleObject(this.labels[i][m]);
             }
         }
     }
 
-    public void updateBoxPane(int paramInt) {
-        if (!this.game.box.contains(Constants.pieces[paramInt][0]))
-            this.boxPane[paramInt].setHivePiece(0, 0, 0);
-        if (!this.game.box.contains(Constants.pieces[paramInt][2]))
-            this.boxPane[paramInt].setHivePiece(0, 2, 0);
-        if (!this.game.box.contains(Constants.pieces[paramInt][1]))
-            this.boxPane[paramInt].setHivePiece(0, -2, 0);
-        if (!this.game.box.contains(Constants.pieces[paramInt][4]))
-            this.boxPane[paramInt].setHivePiece(0, 4, 0);
-        if (!this.game.box.contains(Constants.pieces[paramInt][3]))
-            this.boxPane[paramInt].setHivePiece(0, -4, 0);
+    public void updateBoxPane(int color) {
+        if (!this.game.box.contains(Piece.pieces[color][QUEEN]))
+            this.boxPane[color].setHivePiece(0, 0, 0);
+        if (!this.game.box.contains(Piece.pieces[color][BEETLE]))
+            this.boxPane[color].setHivePiece(0, 2, 0);
+        if (!this.game.box.contains(Piece.pieces[color][SPIDER]))
+            this.boxPane[color].setHivePiece(0, -2, 0);
+        if (!this.game.box.contains(Piece.pieces[color][HOPPER]))
+            this.boxPane[color].setHivePiece(0, 4, 0);
+        if (!this.game.box.contains(Piece.pieces[color][ANT]))
+            this.boxPane[color].setHivePiece(0, -4, 0);
         int i;
-        if (paramInt == 0)
-            i = this.boxPane[paramInt].getCellWidth() / 2 + 5;
+        if (color == 0)
+            i = this.boxPane[color].getCellWidth() / 2 + 5;
         else
-            i = -this.boxPane[paramInt].getCellWidth() / 2 - 13;
+            i = -this.boxPane[color].getCellWidth() / 2 - 13;
         int j = 0;
         for (int k = 0; k < 5; k++) {
-            int m = coordC2FromPieceType(Constants.pieces[paramInt][k]);
-            int n = this.game.box.howMany(paramInt, k);
+            int m = coordC2FromPieceType(Piece.pieces[color][k]);
+            int n = this.game.box.howMany(color, k);
             String str;
             if (n > 0)
                 str = new Integer(n).toString();
             else
                 str = " ";
-            this.labels[paramInt][k].setText(str);
+            this.labels[color][k].setText(str);
         }
     }
 
@@ -569,7 +547,7 @@ public class OpeningDBBuilder extends JFrame
                     int i = 0;
                     if (paramHiveMouseEvent.sender == OpeningDBBuilder.this.tablePane) {
                         OpeningDBBuilder.GetMoveState.this.newCoords = Coords.instance(paramHiveMouseEvent.getP(), paramHiveMouseEvent.getQ());
-                        OpeningDBBuilder.GetMoveState.this.move = Move.instance(OpeningDBBuilder.GetMoveState.this.piece, OpeningDBBuilder.GetMoveState.this.prevCoords, OpeningDBBuilder.GetMoveState.this.newCoords);
+                        OpeningDBBuilder.GetMoveState.this.move = new Move(OpeningDBBuilder.GetMoveState.this.piece, OpeningDBBuilder.GetMoveState.this.prevCoords, OpeningDBBuilder.GetMoveState.this.newCoords);
                         if (OpeningDBBuilder.GetMoveState.this.availableMoves.contains(OpeningDBBuilder.GetMoveState.this.move))
                             i = 1;
                         else
@@ -627,7 +605,7 @@ public class OpeningDBBuilder extends JFrame
                         OpeningDBBuilder.this.boxPane[0].clearHighlights();
                         OpeningDBBuilder.this.boxPane[1].clearHighlights();
 
-                        localPiece = Constants.pieces[OpeningDBBuilder.GetMoveState.this.color][i];
+                        localPiece = Piece.pieces[OpeningDBBuilder.GetMoveState.this.color][i];
                         OpeningDBBuilder.GetMoveState.this.piece = localPiece;
                         OpeningDBBuilder.GetMoveState.this.prevCoords = null;
 

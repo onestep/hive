@@ -1,17 +1,13 @@
 package hive.game.providers.impl;
 
-import java.io.PrintStream;
-
 public final class IterativeDeeper implements Runnable {
 
     private int depth;
-    private PrintStream old_out;
     private Thread finder;
-    Object monitor = new Object();
+    private final Object monitor = new Object();
     private MTD mtd;
     private int increment;
     private int startingDepth;
-    private long milisec;
     private int color;
 
     public IterativeDeeper(MTD mtd) {
@@ -20,36 +16,35 @@ public final class IterativeDeeper implements Runnable {
 
     @Override
     public void run() {
-        this.depth = (this.startingDepth + this.increment);
+        depth = startingDepth + increment;
         while (true) {
-            this.mtd.search(this.color, this.depth);
-            synchronized (this.monitor) {
-                if (!this.mtd.isInterrupted())
-                    this.depth += this.increment;
+            mtd.search(color, depth);
+            synchronized (monitor) {
+                if (!mtd.isInterrupted())
+                    depth += increment;
                 else
                     break;
             }
         }
     }
 
-    public void search(int paramInt1, long paramLong, int paramInt2, int paramInt3) {
-        this.milisec = paramLong;
-        this.increment = paramInt3;
-        this.startingDepth = paramInt2;
+    public void search(int color, long timeout, int startingDepth, int increment) {
+        this.color = color;
+        this.increment = increment;
+        this.startingDepth = startingDepth;
 
-        this.mtd.search(paramInt1, paramInt2);
-        this.color = paramInt1;
-        Thread localThread = new Thread(this, "Iterative deeping thread");
-        localThread.start();
+        mtd.search(color, startingDepth);
+        finder = new Thread(this, "Iterative deeping thread");
+        finder.start();
         try {
-            localThread.join(paramLong);
-            synchronized (this.monitor) {
-                if (localThread.isAlive())
-                    this.mtd.interrupt();
+            finder.join(timeout);
+            synchronized (monitor) {
+                if (finder.isAlive())
+                    mtd.interrupt();
             }
-            localThread.join();
-        } catch (InterruptedException localInterruptedException) {
+            finder.join();
+        } catch (InterruptedException ex) {
         }
-        System.out.println("Depth: " + (this.depth - paramInt3));
+        System.out.println("Depth: " + (depth - increment));
     }
 }

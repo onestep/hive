@@ -21,7 +21,6 @@ public abstract class HiveTest {
     public abstract String getName();
 
     protected void putPiece(Game game, Piece piece, Coords coords) {
-        Move move = Move.instance(piece, null, coords);
-        game.doMove(move);
+        game.doMove(new Move(piece, null, coords));
     }
 }
