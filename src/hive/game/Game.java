@@ -165,10 +165,11 @@ public final class Game {
     }
 
     public final synchronized int evaluate(int color) {
-	int i = halfEvaluate(color);
-	int j = halfEvaluate(opponent(color));
-	int k = (i < WIN ? j < WIN ? i - j : LOSS : j < WIN ? WIN : i - j);
-	return k;
+	int p = halfEvaluate(color);
+	int o = halfEvaluate(opponent(color));
+	int delta = (p < WIN ? (o < WIN ? p - o : LOSS) : (o < WIN ? WIN : p - o));
+        //System.out.println("Player: " + evaluation + ", Opponent: " + opponentEvaluation + ", Result: " + delta);
+	return delta;
     }
 
     public final int halfEvaluate(int color) {
@@ -189,7 +190,7 @@ public final class Game {
     public boolean isWin(int color) {
 	if (plyes() < 7)
 	    return false;
-	Coords coords = table.firstCoordsForPiece(Constants.queens[opponent(color)]);
+	Coords coords = table.firstCoordsForPiece(Piece.pieces[opponent(color)][QUEEN]);
 	if (coords != null) {
 	    for (int i = 0; i < 6; i++)
 		if (table.countPiecesAt(coords.getNeighbour(i)) == 0)
@@ -224,11 +225,11 @@ public final class Game {
     }
 
     public boolean canMove(int color) {
-	return !box.contains(Constants.queens[color]);
+	return !box.contains(Piece.pieces[color][QUEEN]);
     }
 
     public boolean mustInsertQueen(int color) {
-	return box.contains(Constants.queens[color]) && (countMoves(color) == 3);
+	return box.contains(Piece.pieces[color][QUEEN]) && (countMoves(color) == 3);
     }
 
     public static int opponent(int color) {

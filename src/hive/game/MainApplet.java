@@ -531,15 +531,15 @@ public class MainApplet extends JFrame
 
     int coordC2FromPieceType(Piece piece) {
         switch (piece.type) {
-            case 0:
+            case QUEEN:
                 return 0;
-            case 2:
+            case BEETLE:
                 return 2;
-            case 1:
+            case SPIDER:
                 return -2;
-            case 4:
+            case HOPPER:
                 return 4;
-            case 3:
+            case ANT:
                 return -4;
             default:
                 throw new Error("Bad Piece");
@@ -761,7 +761,7 @@ public class MainApplet extends JFrame
 
                 if (game.mustInsertQueen(color)) {
                     out.println("You must insert Queen bee.");
-                    piece = Constants.queens[color];
+                    piece = Piece.pieces[color][QUEEN];
                     prevCoords = null;
                     boxPane[color].setHighlight(0, coordC2FromPieceType(piece), Color.blue, 3.0F, true);
                     highlightSet(game.getTargetCoords(piece, null));

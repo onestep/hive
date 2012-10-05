@@ -19,8 +19,6 @@ public interface Constants {
     String[] colorNames = {"blue", "silver"};
     int[] howManyPieces = {1, 2, 2, 3, 3};
     boolean[] mustHaveFreedom = {true, true, false, true, false};
-    //Piece[][] pieces = Piece.pieces;
-    Piece[] queens = {Piece.pieces[BLUE][QUEEN], Piece.pieces[SILVER][QUEEN]};
     int[] neighbourToC1 = {0, 1, 1, 0, -1, -1};
     int[] neighbourToC2 = {2, 1, -1, -2, -1, 1};
 }

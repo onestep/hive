@@ -25,9 +25,9 @@ public class InteractiveNegaMaxAB implements Constants {
         interrupted = false;
         foundMove = null;
 
-        int i = negaMaxABTop(color, 0, -INFINITY, INFINITY, true);
+        int minMaxValue = negaMaxABTop(color, 0, -INFINITY, INFINITY, true);
 
-        System.out.println("MinMaxVal=" + i + " Evaluation=" + game.evaluate(color));
+        System.out.println("MinMaxVal=" + minMaxValue + " Evaluation=" + game.evaluate(color));
 
         if (!interrupted)
             return foundMove;
@@ -46,26 +46,26 @@ public class InteractiveNegaMaxAB implements Constants {
         if (!paramBoolean)
             return true;
 
-        Coords coords = game.table.firstCoordsForPiece(Constants.queens[Game.opponent(move.piece.color)]);
-        boolean i = coords != null ? false : game.table.getPieceAt(coords).color == move.piece.color;
-        boolean bool = (i && (coords.getEdge(move.newCoords) >= 0)) || (!move.isInsertion());
+        Coords coords = game.table.firstCoordsForPiece(Piece.pieces[Game.opponent(move.piece.color)][QUEEN]);
+        boolean b1 = coords != null ? false : game.table.getPieceAt(coords).color == move.piece.color;
+        boolean b2 = (b1 && coords.getEdge(move.newCoords) >= 0 || !move.isInsertion());
 
         switch (depth) {
             case 0:
             case 1:
                 return true;
             case 2:
-                return bool;
+                return b2;
             default:
-                return bool && (move.piece.type != ANT);
+                return b2 && (move.piece.type != ANT);
         }
     }
 
     private int negaMaxABTop(int color, int depth, int a, int b, boolean paramBoolean) {
         if ((depth == MAX_DEPTH) || game.isWin(BLUE) || game.isWin(SILVER))
             return game.evaluate(color);
-        int i = -INFINITY;
-        int j = i;
+        int minMaxValue = -INFINITY;
+        int j = minMaxValue;
 
         Collection moves = game.getMoves(color, comparator);
 
@@ -73,12 +73,12 @@ public class InteractiveNegaMaxAB implements Constants {
             return -negaMaxAB(Game.opponent(color), depth, -b, -a, false);
         Iterator it = moves.iterator();
 
-        while (it.hasNext() && (!interrupted) && (i < b)) {
+        while (it.hasNext() && (!interrupted) && (minMaxValue < b)) {
             Move move = (Move) it.next();
-            if (i > a)
-                a = i;
+            if (minMaxValue > a)
+                a = minMaxValue;
 
-            if (check(move, depth, paramBoolean) || (i == -INFINITY)) {
+            if (check(move, depth, paramBoolean) || (minMaxValue == -INFINITY)) {
                 game.doMove(move);
                 highlighter.highlightAfter(move);
                 j = -negaMaxAB(Game.opponent(color), depth + 1, -b, -a, true);
@@ -86,20 +86,22 @@ public class InteractiveNegaMaxAB implements Constants {
                 highlighter.repaintGame();
             }
 
-            if (j > i) {
-                i = j;
+            if (j > minMaxValue) {
+                minMaxValue = j;
                 foundMove = move;
             }
         }
 
-        return i;
+        return minMaxValue;
     }
 
     private int negaMaxAB(int color, int depth, int a, int b, boolean paramBoolean) {
+        /* break recursion */
         if ((depth == MAX_DEPTH) || game.isWin(BLUE) || game.isWin(SILVER))
             return game.evaluate(color);
-        int i = -INFINITY;
-        int j = i;
+
+        int minMaxValue = -INFINITY;
+        int j = minMaxValue;
 
         Collection moves = game.getMoves(color, comparator);
 
@@ -107,20 +109,20 @@ public class InteractiveNegaMaxAB implements Constants {
             return -negaMaxAB(Game.opponent(color), depth + 1, -b, -a, false);
         Iterator it = moves.iterator();
 
-        while ((it.hasNext()) && (!interrupted) && (i < b)) {
+        while (it.hasNext() && (!interrupted) && (minMaxValue < b)) {
             Move move = (Move) it.next();
-            if (i > a)
-                a = i;
-            if (check(move, depth, paramBoolean) || (i == -INFINITY)) {
+            if (minMaxValue > a)
+                a = minMaxValue;
+            if (check(move, depth, paramBoolean) || (minMaxValue == -INFINITY)) {
                 game.doMove(move);
                 highlighter.highlightAfter(move);
                 j = -negaMaxAB(Game.opponent(color), depth + 1, -b, -a, true);
                 game.unDoMove(move);
                 highlighter.repaintGame();
             }
-            if (j > i)
-                i = j;
+            if (j > minMaxValue)
+                minMaxValue = j;
         }
-        return i;
+        return minMaxValue;
     }
 }
