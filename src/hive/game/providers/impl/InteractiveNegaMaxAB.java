@@ -1,12 +1,13 @@
 package hive.game.providers.impl;
 
+import static hive.game.Constants.*;
 import hive.game.*;
 import hive.intf.MoveHighlighter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 
-public class InteractiveNegaMaxAB implements Constants {
+public class InteractiveNegaMaxAB {
 
     private static final int MAX_DEPTH = 4;
     private Move foundMove;

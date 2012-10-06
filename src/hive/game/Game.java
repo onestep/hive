@@ -167,9 +167,7 @@ public final class Game {
     public final synchronized int evaluate(int color) {
 	int p = halfEvaluate(color);
 	int o = halfEvaluate(opponent(color));
-	int delta = (p < WIN ? (o < WIN ? p - o : LOSS) : (o < WIN ? WIN : p - o));
-        //System.out.println("Player: " + evaluation + ", Opponent: " + opponentEvaluation + ", Result: " + delta);
-	return delta;
+	return p < WIN ? (o < WIN ? p - o : LOSS) : (o < WIN ? WIN : p - o);
     }
 
     public final int halfEvaluate(int color) {

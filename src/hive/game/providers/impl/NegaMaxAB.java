@@ -1,12 +1,13 @@
 package hive.game.providers.impl;
 
+import static hive.game.Constants.*;
 import hive.game.*;
 import hive.intf.Thinker;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 
-public class NegaMaxAB implements Constants {
+public class NegaMaxAB {
 
     private static final int MAX_DEPTH = 4;
     private Move foundMove;
